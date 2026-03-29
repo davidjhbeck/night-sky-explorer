@@ -577,8 +577,6 @@ milkyWayImage.crossOrigin = "anonymous";
 milkyWayImage.src = "https://upload.wikimedia.org/wikipedia/commons/6/60/ESO_-_Milky_Way.jpg";
 const milkyWaySamples = [];
 let milkyWayReady = false;
-const milkyWayBuffer = document.createElement("canvas");
-const milkyWayBufferCtx = milkyWayBuffer.getContext("2d");
 
 const state = {
   centerRa: 6,
@@ -988,7 +986,7 @@ milkyWayImage.addEventListener("load", () => {
         continue;
       }
 
-      const galacticLongitude = wrapDegrees(((x / sampleWidth) - 0.5) * 360);
+      const galacticLongitude = wrapDegrees((0.5 - x / sampleWidth) * 360);
       const galacticLatitude = 90 - (y / sampleHeight) * 180;
       const equatorial = galacticToEquatorial(galacticLongitude, galacticLatitude);
 
@@ -1172,17 +1170,11 @@ function drawMilkyWayImage() {
 
   const width = canvas.clientWidth;
   const height = canvas.clientHeight;
-  const bufferScale = 0.34;
-  const bufferWidth = Math.max(220, Math.round(width * bufferScale));
-  const bufferHeight = Math.max(220, Math.round(height * bufferScale));
+  const baseRadius = 1.6 + state.zoom * 0.14;
+  const opacityScale = state.milkyWayBrightness * 0.22;
 
-  if (milkyWayBuffer.width !== bufferWidth || milkyWayBuffer.height !== bufferHeight) {
-    milkyWayBuffer.width = bufferWidth;
-    milkyWayBuffer.height = bufferHeight;
-  }
-
-  milkyWayBufferCtx.clearRect(0, 0, bufferWidth, bufferHeight);
-  milkyWayBufferCtx.globalCompositeOperation = "source-over";
+  ctx.save();
+  ctx.globalCompositeOperation = "screen";
 
   for (const sample of milkyWaySamples) {
     const point = raDecToScreen(sample.ra, sample.dec);
@@ -1190,29 +1182,25 @@ function drawMilkyWayImage() {
       continue;
     }
     if (
-      point.x < -90 ||
-      point.x > width + 90 ||
-      point.y < -90 ||
-      point.y > height + 90
+      point.x < -48 ||
+      point.x > width + 48 ||
+      point.y < -48 ||
+      point.y > height + 48
     ) {
       continue;
     }
 
-    const scaledX = point.x * bufferScale;
-    const scaledY = point.y * bufferScale;
-    const opacity = sample.alpha * state.milkyWayBrightness * 0.34;
-    const radius = Math.max(1.6, (2.2 + state.zoom * 0.2) * bufferScale);
-    milkyWayBufferCtx.fillStyle = `rgba(${sample.red}, ${sample.green}, ${sample.blue}, ${opacity.toFixed(3)})`;
-    milkyWayBufferCtx.beginPath();
-    milkyWayBufferCtx.ellipse(scaledX, scaledY, radius * 5.6, radius * 2.6, 0, 0, Math.PI * 2);
-    milkyWayBufferCtx.fill();
+    const opacity = sample.alpha * opacityScale;
+    const radius = baseRadius + sample.alpha * 2.8;
+    ctx.fillStyle = `rgba(${sample.red}, ${sample.green}, ${sample.blue}, ${opacity.toFixed(3)})`;
+    ctx.shadowColor = `rgba(${sample.red}, ${sample.green}, ${sample.blue}, ${(opacity * 1.6).toFixed(3)})`;
+    ctx.shadowBlur = radius * 4.2;
+    ctx.beginPath();
+    ctx.ellipse(point.x, point.y, radius * 2.4, radius * 1.1, 0, 0, Math.PI * 2);
+    ctx.fill();
   }
 
-  ctx.save();
-  ctx.globalAlpha = 0.92;
-  ctx.filter = "blur(18px) saturate(0.92)";
-  ctx.drawImage(milkyWayBuffer, 0, 0, width, height);
-  ctx.filter = "none";
+  ctx.shadowBlur = 0;
   ctx.restore();
 }
 
