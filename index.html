@@ -44,28 +44,11 @@
         <details class="mobile-controls-shell" id="mobile-controls-shell">
           <summary class="mobile-controls-toggle">Controls</summary>
           <div class="projection-controls" id="projection-controls">
-          <label class="projection-select-wrap" for="coordinate-system">
-            <span class="toolbar-label">Coordinate system</span>
-            <select id="coordinate-system" aria-label="Choose the coordinate system">
-              <option value="equatorial">Equatorial (RA/Dec)</option>
-              <option value="horizontal" selected>Local horizon</option>
-            </select>
-          </label>
-
-          <label class="projection-select-wrap" for="projection-select">
-            <span class="toolbar-label">Map projection</span>
-            <select id="projection-select" aria-label="Choose the sky projection">
-              <option value="equirectangular">Equirectangular</option>
-              <option value="orthographic">Orthographic</option>
-              <option value="stereographic" selected>Stereographic</option>
-            </select>
-          </label>
-
-          <label class="projection-select-wrap" for="constellation-detail">
-            <span class="toolbar-label">Constellation lines</span>
-            <select id="constellation-detail" aria-label="Choose constellation line detail">
-              <option value="major">Major lines</option>
-              <option value="full" selected>More complete lines</option>
+          <label class="projection-select-wrap" for="labels-visibility">
+            <span class="toolbar-label">Text and labels</span>
+            <select id="labels-visibility" aria-label="Choose label visibility">
+              <option value="on" selected>Show all labels</option>
+              <option value="off">Hide all labels</option>
             </select>
           </label>
 
@@ -85,17 +68,11 @@
             </select>
           </label>
 
-          <label class="projection-select-wrap" for="observer-latitude">
+          <label class="projection-select-wrap" for="latitude-picker-button">
             <span class="toolbar-label">Observer latitude</span>
-            <input
-              id="observer-latitude"
-              type="number"
-              min="-90"
-              max="90"
-              step="0.1"
-              value="42.0"
-              aria-label="Observer latitude in degrees"
-            />
+            <button id="latitude-picker-button" type="button" class="control-button" aria-expanded="false">
+              Adjust latitude
+            </button>
           </label>
 
           <label class="projection-select-wrap slider-wrap" for="field-brightness">
@@ -134,6 +111,33 @@
 
         <div class="viewer-frame">
           <canvas id="star-map" aria-label="Interactive map of stars and constellations"></canvas>
+          <aside class="latitude-panel" id="latitude-panel" aria-label="Observer latitude picker" hidden>
+            <div class="latitude-panel-card">
+              <p class="overlay-kicker">Observer latitude</p>
+              <p class="latitude-value" id="latitude-value">42.0° N</p>
+              <div class="latitude-picker">
+                <input
+                  id="latitude-slider"
+                  class="latitude-slider"
+                  type="range"
+                  min="25"
+                  max="49"
+                  step="0.1"
+                  value="42"
+                  aria-label="Adjust observer latitude"
+                />
+                <div class="us-map" id="us-map" aria-hidden="true">
+                  <svg viewBox="0 0 240 140" class="us-map-svg">
+                    <path
+                      class="us-map-outline"
+                      d="M16 82 L23 63 L40 57 L58 52 L81 48 L104 41 L132 37 L158 36 L180 40 L201 46 L219 55 L225 64 L213 76 L198 82 L191 95 L172 101 L147 105 L122 110 L98 109 L81 104 L59 98 L42 95 L29 90 Z"
+                    />
+                    <line class="us-map-latitude" id="us-map-latitude" x1="20" x2="220" y1="44" y2="44" />
+                  </svg>
+                </div>
+              </div>
+            </div>
+          </aside>
           <div class="viewer-overlay">
             <div class="overlay-card" id="object-card">
               <p class="overlay-kicker">Hover a star</p>

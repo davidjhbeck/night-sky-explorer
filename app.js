@@ -483,13 +483,15 @@ const objectName = document.getElementById("object-name");
 const objectMeta = document.getElementById("object-meta");
 const objectCoords = document.getElementById("object-coords");
 const objectCard = document.getElementById("object-card");
-const projectionSelect = document.getElementById("projection-select");
 const projectionDescription = document.getElementById("projection-description");
-const constellationDetailSelect = document.getElementById("constellation-detail");
+const labelsVisibilitySelect = document.getElementById("labels-visibility");
 const asterismVisibilitySelect = document.getElementById("asterism-visibility");
 const deepSkyVisibilitySelect = document.getElementById("deep-sky-visibility");
-const coordinateSystemSelect = document.getElementById("coordinate-system");
-const observerLatitudeInput = document.getElementById("observer-latitude");
+const latitudePickerButton = document.getElementById("latitude-picker-button");
+const latitudePanel = document.getElementById("latitude-panel");
+const latitudeSlider = document.getElementById("latitude-slider");
+const latitudeValue = document.getElementById("latitude-value");
+const usMapLatitude = document.getElementById("us-map-latitude");
 const timeOfDayWheel = document.getElementById("time-of-day");
 const timeOfDayValue = document.getElementById("time-of-day-value");
 const seasonDayWheel = document.getElementById("season-day");
@@ -537,11 +539,13 @@ const state = {
   pointerY: 0,
   hoverStar: starMap.get("polaris"),
   projection: "stereographic",
+  labelsVisibility: "on",
   constellationDetail: "full",
   asterismVisibility: "on",
   deepSkyVisibility: "popular",
   coordinateSystem: "horizontal",
   observerLatitude: 42,
+  latitudePanelOpen: false,
   timeOfDayHours: 22,
   seasonDay: getDayOfYear(currentDate),
   fieldStarBrightness: 1.6,
@@ -882,6 +886,10 @@ function updateInfoCard(star) {
   objectCoords.textContent = `RA ${star.ra.toFixed(2)}h • Dec ${star.dec >= 0 ? "+" : ""}${star.dec.toFixed(1)}°`;
 }
 
+function labelsAreVisible() {
+  return state.labelsVisibility === "on";
+}
+
 function drawGrid() {
   const width = canvas.clientWidth;
   const height = canvas.clientHeight;
@@ -918,7 +926,7 @@ function drawGrid() {
     }
 
     ctx.stroke();
-    if (labelPoint && labelPoint.x > -60 && labelPoint.x < width + 60) {
+    if (labelsAreVisible() && labelPoint && labelPoint.x > -60 && labelPoint.x < width + 60) {
       const label = latitudeLabel ? `${Math.round(lon / 15)}h` : `${Math.round(lon)}°`;
       ctx.fillText(label, labelPoint.x + 6, Math.max(18, labelPoint.y + 14));
     }
@@ -948,7 +956,7 @@ function drawGrid() {
     }
 
     ctx.stroke();
-    if (labelPoint && labelPoint.y > -24 && labelPoint.y < height + 24) {
+    if (labelsAreVisible() && labelPoint && labelPoint.y > -24 && labelPoint.y < height + 24) {
       ctx.fillText(`${lat > 0 ? "+" : ""}${lat}°`, labelPoint.x + 10, labelPoint.y - 6);
     }
   }
@@ -987,7 +995,7 @@ function drawHorizonLine() {
 }
 
 function drawCardinalDirections() {
-  if (state.coordinateSystem !== "horizontal") {
+  if (state.coordinateSystem !== "horizontal" || !labelsAreVisible()) {
     return;
   }
 
@@ -1005,7 +1013,7 @@ function drawCardinalDirections() {
   ctx.textBaseline = "bottom";
 
   for (const direction of directions) {
-    const point = lonLatToScreen(direction.lon, 3);
+    const point = lonLatToScreen(direction.lon, 1);
     if (!point) {
       continue;
     }
@@ -1025,9 +1033,11 @@ function drawCardinalDirections() {
 }
 
 function drawConstellations() {
+  if (!labelsAreVisible()) {
+    return;
+  }
+
   ctx.save();
-  ctx.fillStyle = "rgba(159, 208, 255, 0.78)";
-  ctx.font = '13px "Space Mono", monospace';
 
   for (const constellation of constellations) {
     const wrapOffsets = projectionMetadata[state.projection].drawWrapCopies ? [-360, 0, 360] : [0];
@@ -1037,9 +1047,13 @@ function drawConstellations() {
         drawConstellationSegments(constellation.extraSegments, wrapOffset, 1, "rgba(159, 208, 255, 0.26)");
       }
 
-      const labelPoint = raDecToScreen(constellation.labelRa, constellation.labelDec, wrapOffset);
-      if (labelPoint && labelPoint.x > -120 && labelPoint.x < canvas.clientWidth + 120) {
-        ctx.fillText(constellation.name, labelPoint.x + 8, labelPoint.y - 8);
+      if (labelsAreVisible()) {
+        ctx.fillStyle = "rgba(159, 208, 255, 0.78)";
+        ctx.font = '13px "Space Mono", monospace';
+        const labelPoint = raDecToScreen(constellation.labelRa, constellation.labelDec, wrapOffset);
+        if (labelPoint && labelPoint.x > -120 && labelPoint.x < canvas.clientWidth + 120) {
+          ctx.fillText(constellation.name, labelPoint.x + 8, labelPoint.y - 8);
+        }
       }
     }
   }
@@ -1047,7 +1061,7 @@ function drawConstellations() {
 }
 
 function drawAsterisms() {
-  if (state.asterismVisibility === "off") {
+  if (state.asterismVisibility === "off" || !labelsAreVisible()) {
     return;
   }
 
@@ -1139,7 +1153,7 @@ function drawStars() {
       ctx.fill();
       ctx.shadowBlur = 0;
 
-      if (!star.isFieldStar) {
+      if (!star.isFieldStar && labelsAreVisible()) {
         const labelSize = foregroundLabelFontSize();
         const labelOpacity = isHovered ? 0.96 : foregroundLabelOpacity();
         const xOffset = Math.max(4, radius * (0.85 + state.zoom * 0.1));
@@ -1154,8 +1168,11 @@ function drawStars() {
 }
 
 function drawDeepSkyObjects() {
+  if (!labelsAreVisible()) {
+    return;
+  }
+
   const wrapOffsets = projectionMetadata[state.projection].drawWrapCopies ? [-360, 0, 360] : [0];
-  const labelSize = deepSkyLabelFontSize();
   const objects = visibleDeepSkyObjects();
 
   ctx.save();
@@ -1207,10 +1224,13 @@ function drawDeepSkyObjects() {
       }
       ctx.restore();
 
-      const labelOpacity = clamp(0.18 + state.zoom * 0.16, 0.16, 0.82);
-      ctx.fillStyle = `rgba(214, 241, 255, ${labelOpacity.toFixed(3)})`;
-      ctx.font = `${labelSize.toFixed(2)}px "Space Grotesk", sans-serif`;
-      ctx.fillText(object.name, point.x + radius + 5, point.y - radius * 0.35);
+      if (labelsAreVisible()) {
+        const labelSize = deepSkyLabelFontSize();
+        const labelOpacity = clamp(0.18 + state.zoom * 0.16, 0.16, 0.82);
+        ctx.fillStyle = `rgba(214, 241, 255, ${labelOpacity.toFixed(3)})`;
+        ctx.font = `${labelSize.toFixed(2)}px "Space Grotesk", sans-serif`;
+        ctx.fillText(object.name, point.x + radius + 5, point.y - radius * 0.35);
+      }
     }
   }
 
@@ -1281,6 +1301,22 @@ function updateSeasonWheel() {
   seasonDayValue.textContent = formatted;
   seasonDayWheel.setAttribute("aria-valuenow", String(state.seasonDay));
   seasonDayWheel.setAttribute("aria-valuetext", formatted);
+}
+
+function updateLatitudeUI() {
+  const northSouth = state.observerLatitude >= 0 ? "N" : "S";
+  latitudeValue.textContent = `${Math.abs(state.observerLatitude).toFixed(1)}° ${northSouth}`;
+  latitudeSlider.value = state.observerLatitude.toFixed(1);
+  latitudePickerButton.textContent = `Latitude ${state.observerLatitude.toFixed(1)}°`;
+  latitudePickerButton.setAttribute("aria-expanded", state.latitudePanelOpen ? "true" : "false");
+  latitudePanel.hidden = !state.latitudePanelOpen;
+
+  const minLatitude = Number(latitudeSlider.min);
+  const maxLatitude = Number(latitudeSlider.max);
+  const ratio = 1 - (state.observerLatitude - minLatitude) / (maxLatitude - minLatitude);
+  const y = 18 + ratio * 96;
+  usMapLatitude.setAttribute("y1", y.toFixed(1));
+  usMapLatitude.setAttribute("y2", y.toFixed(1));
 }
 
 function setSeasonDay(day) {
@@ -1469,14 +1505,8 @@ canvas.addEventListener("wheel", (event) => {
   draw();
 }, { passive: false });
 
-projectionSelect.addEventListener("change", (event) => {
-  state.projection = event.target.value;
-  projectionDescription.textContent = projectionMetadata[state.projection].label;
-  draw();
-});
-
-constellationDetailSelect.addEventListener("change", (event) => {
-  state.constellationDetail = event.target.value;
+labelsVisibilitySelect.addEventListener("change", (event) => {
+  state.labelsVisibility = event.target.value;
   draw();
 });
 
@@ -1490,16 +1520,16 @@ deepSkyVisibilitySelect.addEventListener("change", (event) => {
   draw();
 });
 
-coordinateSystemSelect.addEventListener("change", (event) => {
-  state.coordinateSystem = event.target.value;
+latitudeSlider.addEventListener("input", (event) => {
+  state.observerLatitude = clamp(Number(event.target.value) || 0, -90, 90);
+  updateLatitudeUI();
   updateInfoCard(state.hoverStar);
   draw();
 });
 
-observerLatitudeInput.addEventListener("input", (event) => {
-  state.observerLatitude = clamp(Number(event.target.value) || 0, -90, 90);
-  updateInfoCard(state.hoverStar);
-  draw();
+latitudePickerButton.addEventListener("click", () => {
+  state.latitudePanelOpen = !state.latitudePanelOpen;
+  updateLatitudeUI();
 });
 
 fieldBrightnessInput.addEventListener("input", (event) => {
@@ -1593,10 +1623,10 @@ seasonDayWheel.addEventListener("pointermove", (event) => {
   }
 
   const deltaY = seasonWheelGesture.startY - event.clientY;
-  const totalDays = deltaY / 14;
+  const totalDays = deltaY / 8;
   const stepDays = totalDays - seasonWheelGesture.accumulatedDays;
 
-  if (Math.abs(stepDays) >= 0.3) {
+  if (Math.abs(stepDays) >= 0.18) {
     seasonWheelGesture.accumulatedDays = totalDays;
     nudgeSeasonDay(stepDays);
   }
@@ -1634,12 +1664,10 @@ window.addEventListener("resize", resizeCanvas);
 
 updateInfoCard(state.hoverStar);
 projectionDescription.textContent = projectionMetadata[state.projection].label;
-projectionSelect.value = state.projection;
-constellationDetailSelect.value = state.constellationDetail;
+labelsVisibilitySelect.value = state.labelsVisibility;
 asterismVisibilitySelect.value = state.asterismVisibility;
 deepSkyVisibilitySelect.value = state.deepSkyVisibility;
-coordinateSystemSelect.value = state.coordinateSystem;
-observerLatitudeInput.value = state.observerLatitude.toFixed(1);
+updateLatitudeUI();
 updateSeasonWheel();
 updateTimeWheel();
 fieldBrightnessValue.textContent = `${fieldBrightnessInput.value}%`;
