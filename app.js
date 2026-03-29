@@ -491,7 +491,6 @@ const deepSkyVisibilitySelect = document.getElementById("deep-sky-visibility");
 const coordinateSystemSelect = document.getElementById("coordinate-system");
 const observerLatitudeInput = document.getElementById("observer-latitude");
 const timeOfDayInput = document.getElementById("time-of-day");
-const timeOfDayValue = document.getElementById("time-of-day-value");
 const seasonDaySelect = document.getElementById("season-day");
 const fieldBrightnessInput = document.getElementById("field-brightness");
 const fieldBrightnessValue = document.getElementById("field-brightness-value");
@@ -1154,6 +1153,15 @@ function formatSeasonDay(day) {
   return date.toLocaleDateString(undefined, { month: "short", day: "numeric" });
 }
 
+function populateTimeOptions() {
+  for (let hour = 0; hour < 24; hour += 1) {
+    const option = document.createElement("option");
+    option.value = String(hour);
+    option.textContent = formatTimeOfDay(hour);
+    timeOfDayInput.append(option);
+  }
+}
+
 function populateSeasonOptions() {
   const daysInYear = getDaysInYear(currentSeasonYear);
 
@@ -1179,6 +1187,10 @@ function draw() {
 }
 
 function findNearestStar(x, y) {
+  return findNearestStarWithinDistance(x, y, 24);
+}
+
+function findNearestStarWithinDistance(x, y, maxDistance) {
   let nearest = null;
   let minDistance = Infinity;
   const wrapOffsets = projectionMetadata[state.projection].drawWrapCopies ? [-360, 0, 360] : [0];
@@ -1199,7 +1211,7 @@ function findNearestStar(x, y) {
     }
   }
 
-  return minDistance < 24 ? nearest : null;
+  return minDistance < maxDistance ? nearest : null;
 }
 
 function handlePointerMove(event) {
@@ -1286,7 +1298,12 @@ canvas.addEventListener("pointermove", (event) => {
 
 canvas.addEventListener("pointerup", (event) => {
   const point = getCanvasPoint(event);
-  const tappedStar = !pointerGesture.moved ? findNearestStar(point.x, point.y) : null;
+  const tapTravel = Math.hypot(point.x - pointerGesture.startX, point.y - pointerGesture.startY);
+  const maxTapDistance = event.pointerType === "touch" ? 40 : 24;
+  const shouldSelectTap = event.pointerType === "touch" ? tapTravel < 18 : !pointerGesture.moved;
+  const tappedStar = shouldSelectTap
+    ? findNearestStarWithinDistance(point.x, point.y, maxTapDistance)
+    : null;
   state.dragging = false;
   canvas.classList.remove("dragging");
   canvas.releasePointerCapture(event.pointerId);
@@ -1365,9 +1382,8 @@ observerLatitudeInput.addEventListener("input", (event) => {
   draw();
 });
 
-timeOfDayInput.addEventListener("input", (event) => {
+timeOfDayInput.addEventListener("change", (event) => {
   state.timeOfDayHours = Number(event.target.value);
-  timeOfDayValue.textContent = formatTimeOfDay(state.timeOfDayHours);
   updateInfoCard(state.hoverStar);
   draw();
 });
@@ -1392,6 +1408,7 @@ foregroundSizeInput.addEventListener("input", (event) => {
 
 window.addEventListener("resize", resizeCanvas);
 
+populateTimeOptions();
 populateSeasonOptions();
 updateInfoCard(state.hoverStar);
 projectionDescription.textContent = projectionMetadata[state.projection].label;
@@ -1403,7 +1420,6 @@ coordinateSystemSelect.value = state.coordinateSystem;
 observerLatitudeInput.value = state.observerLatitude.toFixed(1);
 seasonDaySelect.value = String(state.seasonDay);
 timeOfDayInput.value = String(state.timeOfDayHours);
-timeOfDayValue.textContent = formatTimeOfDay(state.timeOfDayHours);
 fieldBrightnessValue.textContent = `${fieldBrightnessInput.value}%`;
 foregroundSizeValue.textContent = `${foregroundSizeInput.value}%`;
 resizeCanvas();

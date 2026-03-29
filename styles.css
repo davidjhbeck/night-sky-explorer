@@ -143,7 +143,9 @@ h1 {
 #asterism-visibility,
 #deep-sky-visibility,
 #coordinate-system,
-#observer-latitude {
+#observer-latitude,
+#time-of-day,
+#season-day {
   min-width: 240px;
   padding: 12px 14px;
   border: 1px solid rgba(159, 208, 255, 0.22);
@@ -159,7 +161,9 @@ h1 {
 #asterism-visibility:focus,
 #deep-sky-visibility:focus,
 #coordinate-system:focus,
-#observer-latitude:focus {
+#observer-latitude:focus,
+#time-of-day:focus,
+#season-day:focus {
   outline: 2px solid rgba(159, 208, 255, 0.5);
   outline-offset: 2px;
 }
@@ -176,18 +180,9 @@ h1 {
 }
 
 #field-brightness,
-#foreground-size,
-#time-of-day {
+#foreground-size {
   width: min(320px, 100%);
   accent-color: #9fd0ff;
-}
-
-.slider-value {
-  min-width: 72px;
-  font-family: "Space Mono", monospace;
-  font-size: 0.84rem;
-  color: var(--text);
-  text-align: right;
 }
 
 .toolbar-value,
@@ -237,7 +232,7 @@ h1 {
   background: rgba(3, 8, 18, 0.78);
   box-shadow: 0 16px 32px rgba(0, 0, 0, 0.28);
   backdrop-filter: blur(12px);
-  pointer-events: auto;
+  pointer-events: none;
 }
 
 .overlay-card h2 {
@@ -256,7 +251,7 @@ h1 {
   background: rgba(3, 8, 18, 0.78);
   box-shadow: 0 16px 32px rgba(0, 0, 0, 0.28);
   backdrop-filter: blur(12px);
-  pointer-events: auto;
+  pointer-events: none;
 }
 
 .overlay-control {
@@ -279,7 +274,7 @@ h1 {
 }
 
 .overlay-time {
-  width: min(320px, 38vw);
+  width: 132px;
   min-width: 0;
 }
 
@@ -300,24 +295,10 @@ h1 {
   outline-offset: 2px;
 }
 
-.overlay-slider-row {
-  gap: 12px;
-  min-width: 0;
-}
-
 .overlay-dock *,
 .overlay-card * {
   pointer-events: auto;
   touch-action: manipulation;
-}
-
-.overlay-time .slider-value {
-  flex: 0 0 auto;
-}
-
-.overlay-time #time-of-day {
-  flex: 1 1 auto;
-  min-width: 0;
 }
 
 @media (max-width: 720px) {
@@ -389,18 +370,12 @@ h1 {
   }
 
   #field-brightness,
-  #foreground-size,
-  #time-of-day {
+  #foreground-size {
     width: 100%;
   }
 
   .slider-row {
     gap: 10px;
-  }
-
-  .slider-value {
-    min-width: 72px;
-    font-size: 0.75rem;
   }
 
   .viewer-frame {
@@ -439,8 +414,8 @@ h1 {
   }
 
   .overlay-time {
-    flex: 1 1 auto;
-    width: auto;
+    flex: 0 0 124px;
+    width: 124px;
   }
 }
 
@@ -483,16 +458,21 @@ h1 {
   }
 
   .viewer-frame {
-    min-height: calc(100svh - 112px);
+    min-height: calc(100svh - 96px);
   }
 
   .viewer-overlay {
-    padding: 10px;
-    background: linear-gradient(180deg, rgba(2, 6, 13, 0) 0%, rgba(2, 6, 13, 0.16) 42%, rgba(2, 6, 13, 0.42) 100%);
+    padding: 0;
+    background: none;
   }
 
   .overlay-card {
-    padding: 10px 12px;
+    position: absolute;
+    top: 10px;
+    left: 10px;
+    width: auto;
+    max-width: min(230px, calc(100% - 20px));
+    padding: 8px 10px;
   }
 
   .overlay-card .overlay-kicker {
@@ -505,11 +485,15 @@ h1 {
   }
 
   .overlay-dock {
+    position: absolute;
+    left: 10px;
+    right: 10px;
+    bottom: 10px;
     display: grid;
     grid-template-columns: minmax(92px, 108px) minmax(0, 1fr);
     align-items: end;
-    width: 100%;
-    padding: 10px 12px;
+    width: auto;
+    padding: 8px 10px;
   }
 
   .overlay-control-label {
@@ -523,13 +507,5 @@ h1 {
 
   .overlay-time {
     width: 100%;
-  }
-
-  .overlay-slider-row {
-    width: 100%;
-  }
-
-  .slider-value {
-    min-width: 56px;
   }
 }
