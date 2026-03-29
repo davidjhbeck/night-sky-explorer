@@ -553,6 +553,11 @@ const touchGesture = {
   midpointX: 0,
   midpointY: 0
 };
+const pointerGesture = {
+  moved: false,
+  startX: 0,
+  startY: 0
+};
 
 function deltaToPixels(delta, deltaMode, viewportSize) {
   if (deltaMode === WheelEvent.DOM_DELTA_PIXEL) {
@@ -1205,6 +1210,9 @@ function handlePointerMove(event) {
   if (state.dragging) {
     const dx = x - state.pointerX;
     const dy = y - state.pointerY;
+    if (Math.hypot(x - pointerGesture.startX, y - pointerGesture.startY) > 4) {
+      pointerGesture.moved = true;
+    }
     panByPixels(dx, dy);
     state.pointerX = x;
     state.pointerY = y;
@@ -1226,6 +1234,9 @@ canvas.addEventListener("pointerdown", (event) => {
   state.dragging = true;
   state.pointerX = point.x;
   state.pointerY = point.y;
+  pointerGesture.startX = point.x;
+  pointerGesture.startY = point.y;
+  pointerGesture.moved = false;
   canvas.classList.add("dragging");
   canvas.setPointerCapture(event.pointerId);
 
@@ -1248,6 +1259,7 @@ canvas.addEventListener("pointermove", (event) => {
       if (touchGesture.pinchDistance > 0) {
         panByPixels(midpoint.x - touchGesture.midpointX, midpoint.y - touchGesture.midpointY);
         zoomByFactor(distance / touchGesture.pinchDistance);
+        pointerGesture.moved = true;
         draw();
       }
 
@@ -1258,6 +1270,9 @@ canvas.addEventListener("pointermove", (event) => {
     }
 
     if (points.length === 1 && state.dragging) {
+      if (Math.hypot(point.x - pointerGesture.startX, point.y - pointerGesture.startY) > 8) {
+        pointerGesture.moved = true;
+      }
       panByPixels(point.x - state.pointerX, point.y - state.pointerY);
       state.pointerX = point.x;
       state.pointerY = point.y;
@@ -1270,11 +1285,20 @@ canvas.addEventListener("pointermove", (event) => {
 });
 
 canvas.addEventListener("pointerup", (event) => {
+  const point = getCanvasPoint(event);
+  const tappedStar = !pointerGesture.moved ? findNearestStar(point.x, point.y) : null;
   state.dragging = false;
   canvas.classList.remove("dragging");
   canvas.releasePointerCapture(event.pointerId);
   activePointers.delete(event.pointerId);
   resetTouchGesture([...activePointers.values()]);
+  pointerGesture.moved = false;
+  if (tappedStar) {
+    state.hoverStar = tappedStar;
+    objectCard.style.opacity = "1";
+    updateInfoCard(tappedStar);
+    draw();
+  }
 });
 
 canvas.addEventListener("pointercancel", (event) => {
@@ -1283,6 +1307,7 @@ canvas.addEventListener("pointercancel", (event) => {
   canvas.releasePointerCapture(event.pointerId);
   activePointers.delete(event.pointerId);
   resetTouchGesture([...activePointers.values()]);
+  pointerGesture.moved = false;
 });
 
 canvas.addEventListener("pointerleave", () => {
