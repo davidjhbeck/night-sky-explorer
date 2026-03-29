@@ -336,7 +336,7 @@ h1 {
 .overlay-control {
   display: flex;
   flex-direction: column;
-  gap: 2px;
+  gap: 1px;
   min-width: 0;
   width: 100%;
 }
@@ -344,7 +344,7 @@ h1 {
 .overlay-slider-stack {
   display: flex;
   flex-direction: column;
-  gap: 4px;
+  gap: 2px;
   min-width: 0;
 }
 
@@ -357,13 +357,14 @@ h1 {
 
 .overlay-control-label {
   font-family: "Space Mono", monospace;
-  font-size: 0.54rem;
+  font-size: 0.44rem;
   letter-spacing: 0.12em;
   text-transform: uppercase;
   color: var(--accent);
 }
 
 .overlay-date,
+.overlay-longitude,
 .overlay-latitude,
 .overlay-time {
   width: 100%;
@@ -376,10 +377,11 @@ h1 {
   min-width: 52px;
   min-height: 100%;
   padding: 0 10px;
-  border: 1px solid rgba(246, 184, 104, 0.3);
+  border: 1px solid rgba(159, 208, 255, 0.22);
   border-radius: 12px;
-  background: linear-gradient(180deg, rgba(44, 25, 10, 0.94), rgba(19, 12, 7, 0.9));
-  color: #fff1d0;
+  background: rgba(4, 10, 21, 0.88);
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.03);
+  color: var(--text);
   font: inherit;
   font-size: 0.72rem;
   font-weight: 600;
@@ -387,6 +389,15 @@ h1 {
   cursor: pointer;
   pointer-events: auto;
   white-space: nowrap;
+}
+
+.overlay-action-button.is-active {
+  border-color: rgba(246, 184, 104, 0.32);
+  background: linear-gradient(180deg, rgba(53, 30, 10, 0.9), rgba(24, 15, 8, 0.86));
+  box-shadow:
+    inset 0 1px 0 rgba(255, 235, 196, 0.08),
+    0 0 0 1px rgba(246, 184, 104, 0.05);
+  color: #fff1d0;
 }
 
 .overlay-action-button:focus {
@@ -403,15 +414,15 @@ h1 {
   display: flex;
   align-items: center;
   justify-content: center;
-  min-height: 30px;
+  min-height: 24px;
   width: 100%;
-  padding: 3px 10px;
+  padding: 2px 9px;
   border: 1px solid rgba(159, 208, 255, 0.22);
   border-radius: 12px;
   background: rgba(4, 10, 21, 0.88);
   box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.03);
   font-family: "Space Mono", monospace;
-  font-size: 0.76rem;
+  font-size: 0.66rem;
   color: var(--text);
   user-select: none;
   -webkit-user-select: none;
@@ -420,6 +431,45 @@ h1 {
   white-space: nowrap;
   overflow: hidden;
   position: relative;
+}
+
+.time-wheel-main {
+  position: relative;
+  z-index: 1;
+}
+
+.time-wheel-status {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-family: "Space Mono", monospace;
+  font-size: 0.56rem;
+  letter-spacing: 0.18em;
+  color: rgba(237, 244, 255, 0.14);
+  pointer-events: none;
+  text-transform: uppercase;
+}
+
+.time-wheel.time-status-day {
+  background: linear-gradient(180deg, rgba(41, 77, 118, 0.92), rgba(25, 49, 82, 0.9));
+}
+
+.time-wheel.time-status-civil {
+  background: linear-gradient(180deg, rgba(66, 69, 117, 0.9), rgba(37, 34, 77, 0.88));
+}
+
+.time-wheel.time-status-naut {
+  background: linear-gradient(180deg, rgba(38, 43, 86, 0.9), rgba(19, 22, 54, 0.9));
+}
+
+.time-wheel.time-status-astro {
+  background: linear-gradient(180deg, rgba(22, 27, 54, 0.9), rgba(10, 13, 28, 0.92));
+}
+
+.time-wheel.time-status-night {
+  background: rgba(4, 10, 21, 0.88);
 }
 
 .time-wheel::before,
@@ -653,9 +703,9 @@ h1 {
   }
 
   .time-wheel {
-    min-height: 29px;
-    padding: 3px 9px;
-    font-size: 0.74rem;
+    min-height: 23px;
+    padding: 2px 8px;
+    font-size: 0.64rem;
   }
 }
 
@@ -741,7 +791,7 @@ h1 {
   }
 
   .overlay-slider-stack {
-    gap: 3px;
+    gap: 2px;
   }
 
   .overlay-action-column {
@@ -751,7 +801,7 @@ h1 {
   }
 
   .overlay-control-label {
-    font-size: 0.5rem;
+    font-size: 0.42rem;
   }
 
   .overlay-action-button {
@@ -762,8 +812,8 @@ h1 {
   }
 
   .time-wheel {
-    min-height: 28px;
-    padding: 3px 9px;
-    font-size: 0.72rem;
+    min-height: 22px;
+    padding: 2px 8px;
+    font-size: 0.62rem;
   }
 }

@@ -543,6 +543,9 @@ const seasonDayWheel = document.getElementById("season-day");
 const seasonDayValue = document.getElementById("season-day-value");
 const observerLatitudeWheel = document.getElementById("observer-latitude-wheel");
 const observerLatitudeValue = document.getElementById("observer-latitude-value");
+const observerLongitudeWheel = document.getElementById("observer-longitude-wheel");
+const observerLongitudeValue = document.getElementById("observer-longitude-value");
+const timeOfDayStatus = document.getElementById("time-of-day-status");
 const useCurrentLocationButton = document.getElementById("use-current-location");
 const useCurrentDatetimeButton = document.getElementById("use-current-datetime");
 const fieldBrightnessInput = document.getElementById("field-brightness");
@@ -599,17 +602,32 @@ const state = {
   pointerY: 0,
   hoverStar: starMap.get("polaris"),
   projection: "stereographic",
-  labelsVisibility: "on",
+  labelsVisibility: "full",
   constellationDetail: "full",
   asterismVisibility: "on",
   deepSkyVisibility: "popular",
   coordinateSystem: "horizontal",
   observerLatitude: 42,
+  observerLongitude: -83,
   timeOfDayHours: 22,
   seasonDay: getDayOfYear(currentDate),
   fieldStarBrightness: 1.6,
   foregroundStarScale: 0.7,
   milkyWayBrightness: 0.28
+};
+
+const liveState = {
+  currentLocationLatitude: null,
+  currentLocationLongitude: null,
+  usingCurrentLocation: false,
+  usingCurrentDateTime: false
+};
+const astroState = {
+  localDate: getSelectedLocalDate(),
+  utcDate: currentDate,
+  localSiderealHours: 0,
+  solarRightAscensionHours: 0,
+  solarDeclinationDegrees: 0
 };
 
 const activePointers = new Map();
@@ -638,12 +656,22 @@ const latitudeWheelGesture = {
   startX: 0,
   accumulatedDegrees: 0
 };
+const longitudeWheelGesture = {
+  active: false,
+  startX: 0,
+  accumulatedDegrees: 0
+};
 
 function updateSettingsButtons() {
-  labelsVisibilitySelect.setAttribute("aria-label", `Text and labels: ${state.labelsVisibility === "on" ? "show all labels" : "hide all labels"}`);
-  labelsVisibilitySelect.setAttribute("aria-pressed", String(state.labelsVisibility === "on"));
-  labelsVisibilityValue.textContent = state.labelsVisibility === "on" ? "On" : "Off";
-  labelsVisibilitySelect.classList.toggle("is-active", state.labelsVisibility === "on");
+  labelsVisibilitySelect.setAttribute("aria-label", `Text and labels: ${state.labelsVisibility}`);
+  labelsVisibilitySelect.setAttribute("aria-pressed", String(state.labelsVisibility !== "off"));
+  labelsVisibilityValue.textContent =
+    state.labelsVisibility === "full"
+      ? "Full"
+      : state.labelsVisibility === "minimal"
+        ? "Minimal"
+        : "Off";
+  labelsVisibilitySelect.classList.toggle("is-active", state.labelsVisibility !== "off");
 
   patternDetailSelect.setAttribute("aria-label", `Pattern detail: ${state.constellationDetail}`);
   patternDetailSelect.setAttribute("aria-pressed", String(state.constellationDetail === "full"));
@@ -659,6 +687,11 @@ function updateSettingsButtons() {
   deepSkyVisibilitySelect.setAttribute("aria-pressed", String(state.deepSkyVisibility === "full"));
   deepSkyVisibilityValue.textContent = state.deepSkyVisibility === "full" ? "Full" : "Popular";
   deepSkyVisibilitySelect.classList.toggle("is-active", state.deepSkyVisibility === "full");
+}
+
+function updateShortcutButtons() {
+  useCurrentLocationButton.classList.toggle("is-active", liveState.usingCurrentLocation);
+  useCurrentDatetimeButton.classList.toggle("is-active", liveState.usingCurrentDateTime);
 }
 
 function deltaToPixels(delta, deltaMode, viewportSize) {
@@ -750,17 +783,116 @@ function getSeasonOffsetHours() {
   return wrapHours(((state.seasonDay - vernalEquinoxDay) / daysInYear) * 24);
 }
 
-function getSolarRightAscensionHours() {
-  return getSeasonOffsetHours();
+function isNorthAmericaDst(date) {
+  const year = date.getFullYear();
+  const march = new Date(Date.UTC(year, 2, 1));
+  const november = new Date(Date.UTC(year, 10, 1));
+  const firstSundayMarch = 1 + ((7 - march.getUTCDay()) % 7);
+  const secondSundayMarch = firstSundayMarch + 7;
+  const firstSundayNovember = 1 + ((7 - november.getUTCDay()) % 7);
+  const start = Date.UTC(year, 2, secondSundayMarch, 2);
+  const end = Date.UTC(year, 10, firstSundayNovember, 2);
+  return date.getTime() >= start && date.getTime() < end;
 }
 
-function getLocalSiderealHours() {
-  return wrapHours(getSolarRightAscensionHours() + state.timeOfDayHours - 12);
+function estimateTimeZoneOffsetHours(localDate, longitude, latitude) {
+  if (latitude >= 24 && latitude <= 50 && longitude >= -125 && longitude <= -66) {
+    let standardOffset;
+    if (longitude < -115) {
+      standardOffset = -8;
+    } else if (longitude < -100) {
+      standardOffset = -7;
+    } else if (longitude < -85) {
+      standardOffset = -6;
+    } else {
+      standardOffset = -5;
+    }
+    return standardOffset + (isNorthAmericaDst(localDate) ? 1 : 0);
+  }
+
+  return Math.round(longitude / 15);
+}
+
+function getSelectedLocalDate() {
+  const date = dayOfYearToDate(state.seasonDay);
+  const wholeHours = Math.floor(state.timeOfDayHours);
+  const minutes = Math.round((state.timeOfDayHours - wholeHours) * 60);
+  return new Date(
+    currentSeasonYear,
+    date.getMonth(),
+    date.getDate(),
+    wholeHours,
+    minutes,
+    0,
+    0
+  );
+}
+
+function getSelectedUtcDate() {
+  const localDate = getSelectedLocalDate();
+  const timezoneOffsetHours = estimateTimeZoneOffsetHours(
+    localDate,
+    state.observerLongitude,
+    state.observerLatitude
+  );
+  return new Date(localDate.getTime() - timezoneOffsetHours * 3600000);
+}
+
+function getSolarRightAscensionHours(date = getSelectedUtcDate()) {
+  const julianDate = date.getTime() / 86400000 + 2440587.5;
+  const daysSinceJ2000 = julianDate - 2451545.0;
+  const meanLongitude = wrapDegrees(280.46 + 0.9856474 * daysSinceJ2000);
+  const meanAnomaly = wrapDegrees(357.528 + 0.9856003 * daysSinceJ2000);
+  const eclipticLongitude =
+    meanLongitude +
+    1.915 * Math.sin((meanAnomaly * Math.PI) / 180) +
+    0.02 * Math.sin((2 * meanAnomaly * Math.PI) / 180);
+  const obliquity = 23.439 - 0.0000004 * daysSinceJ2000;
+  const lambda = (eclipticLongitude * Math.PI) / 180;
+  const epsilon = (obliquity * Math.PI) / 180;
+  const rightAscension = normalizeRightAscensionDegrees(
+    (Math.atan2(Math.cos(epsilon) * Math.sin(lambda), Math.cos(lambda)) * 180) / Math.PI
+  );
+  return rightAscension / 15;
+}
+
+function getSolarDeclinationDegrees(date = getSelectedUtcDate()) {
+  const julianDate = date.getTime() / 86400000 + 2440587.5;
+  const daysSinceJ2000 = julianDate - 2451545.0;
+  const meanLongitude = wrapDegrees(280.46 + 0.9856474 * daysSinceJ2000);
+  const meanAnomaly = wrapDegrees(357.528 + 0.9856003 * daysSinceJ2000);
+  const eclipticLongitude =
+    meanLongitude +
+    1.915 * Math.sin((meanAnomaly * Math.PI) / 180) +
+    0.02 * Math.sin((2 * meanAnomaly * Math.PI) / 180);
+  const obliquity = 23.439 - 0.0000004 * daysSinceJ2000;
+  const lambda = (eclipticLongitude * Math.PI) / 180;
+  const epsilon = (obliquity * Math.PI) / 180;
+  return (Math.asin(Math.sin(epsilon) * Math.sin(lambda)) * 180) / Math.PI;
+}
+
+function getLocalSiderealHours(date = getSelectedUtcDate()) {
+  const julianDate = date.getTime() / 86400000 + 2440587.5;
+  const julianCenturies = (julianDate - 2451545.0) / 36525;
+  const gmstDegrees =
+    280.46061837 +
+    360.98564736629 * (julianDate - 2451545.0) +
+    0.000387933 * julianCenturies * julianCenturies -
+    (julianCenturies * julianCenturies * julianCenturies) / 38710000;
+  return wrapHours((wrapDegrees(gmstDegrees) + state.observerLongitude) / 15);
+}
+
+function updateAstroState() {
+  astroState.localDate = getSelectedLocalDate();
+  astroState.utcDate = getSelectedUtcDate();
+  astroState.localSiderealHours = getLocalSiderealHours(astroState.utcDate);
+  astroState.solarRightAscensionHours = getSolarRightAscensionHours(astroState.utcDate);
+  astroState.solarDeclinationDegrees = getSolarDeclinationDegrees(astroState.utcDate);
 }
 
 function equatorialToHorizontal(ra, dec) {
   const latitude = (state.observerLatitude * Math.PI) / 180;
-  const localSkyHours = getLocalSiderealHours();
+  const localSkyHours = astroState.localSiderealHours;
   const hourAngle = ((localSkyHours - ra) * Math.PI) / 12;
   const declination = (dec * Math.PI) / 180;
   const sinDeclination = Math.sin(declination);
@@ -991,7 +1123,7 @@ function horizontalToEquatorial(lon, lat) {
     -sinAzimuth * cosAltitude,
     sinAltitude * cosLatitude - cosAltitude * sinLatitude * cosAzimuth
   );
-  const rightAscension = wrapHours(getLocalSiderealHours() - (hourAngle * 12) / Math.PI);
+  const rightAscension = wrapHours(astroState.localSiderealHours - (hourAngle * 12) / Math.PI);
 
   return {
     ra: rightAscension,
@@ -1151,7 +1283,15 @@ function updateInfoCard(star) {
 }
 
 function labelsAreVisible() {
-  return state.labelsVisibility === "on";
+  return state.labelsVisibility !== "off";
+}
+
+function useFullLabels() {
+  return state.labelsVisibility === "full";
+}
+
+function useMinimalLabels() {
+  return state.labelsVisibility === "minimal";
 }
 
 function drawGrid() {
@@ -1190,7 +1330,7 @@ function drawGrid() {
     }
 
     ctx.stroke();
-    if (labelsAreVisible() && labelPoint && labelPoint.x > -60 && labelPoint.x < width + 60) {
+    if (useFullLabels() && labelPoint && labelPoint.x > -60 && labelPoint.x < width + 60) {
       const label = latitudeLabel ? `${Math.round(lon / 15)}h` : `${Math.round(lon)}°`;
       ctx.fillText(label, labelPoint.x + 6, Math.max(18, labelPoint.y + 14));
     }
@@ -1220,7 +1360,7 @@ function drawGrid() {
     }
 
     ctx.stroke();
-    if (labelsAreVisible() && labelPoint && labelPoint.y > -24 && labelPoint.y < height + 24) {
+    if (useFullLabels() && labelPoint && labelPoint.y > -24 && labelPoint.y < height + 24) {
       ctx.fillText(`${lat > 0 ? "+" : ""}${lat}°`, labelPoint.x + 10, labelPoint.y - 6);
     }
   }
@@ -1469,9 +1609,11 @@ function drawAsterisms() {
       if (state.constellationDetail === "full" && asterism.extraSegments?.length) {
         drawConstellationSegments(asterism.extraSegments, wrapOffset, 1.15, "rgba(238, 224, 161, 0.24)");
       }
-      const labelPoint = raDecToScreen(asterism.labelRa, asterism.labelDec, wrapOffset);
-      if (labelPoint && labelPoint.x > -120 && labelPoint.x < canvas.clientWidth + 120) {
-        ctx.fillText(asterism.name, labelPoint.x + 6, labelPoint.y - 10);
+      if (useFullLabels()) {
+        const labelPoint = raDecToScreen(asterism.labelRa, asterism.labelDec, wrapOffset);
+        if (labelPoint && labelPoint.x > -120 && labelPoint.x < canvas.clientWidth + 120) {
+          ctx.fillText(asterism.name, labelPoint.x + 6, labelPoint.y - 10);
+        }
       }
     }
   }
@@ -1549,7 +1691,7 @@ function drawStars() {
       ctx.fill();
       ctx.shadowBlur = 0;
 
-      if (!star.isFieldStar && labelsAreVisible()) {
+      if (!star.isFieldStar && useFullLabels()) {
         const labelSize = foregroundLabelFontSize();
         const labelOpacity = isHovered ? 0.96 : foregroundLabelOpacity();
         const xOffset = Math.max(4, radius * (0.85 + state.zoom * 0.1));
@@ -1564,7 +1706,7 @@ function drawStars() {
 }
 
 function drawDeepSkyObjects() {
-  if (!labelsAreVisible()) {
+  if (!useFullLabels()) {
     return;
   }
 
@@ -1620,13 +1762,11 @@ function drawDeepSkyObjects() {
       }
       ctx.restore();
 
-      if (labelsAreVisible()) {
-        const labelSize = deepSkyLabelFontSize();
-        const labelOpacity = clamp(0.18 + state.zoom * 0.16, 0.16, 0.82);
-        ctx.fillStyle = `rgba(214, 241, 255, ${labelOpacity.toFixed(3)})`;
-        ctx.font = `${labelSize.toFixed(2)}px "Space Grotesk", sans-serif`;
-        ctx.fillText(object.name, point.x + radius + 5, point.y - radius * 0.35);
-      }
+      const labelSize = deepSkyLabelFontSize();
+      const labelOpacity = clamp(0.18 + state.zoom * 0.16, 0.16, 0.82);
+      ctx.fillStyle = `rgba(214, 241, 255, ${labelOpacity.toFixed(3)})`;
+      ctx.font = `${labelSize.toFixed(2)}px "Space Grotesk", sans-serif`;
+      ctx.fillText(object.name, point.x + radius + 5, point.y - radius * 0.35);
     }
   }
 
@@ -1669,6 +1809,26 @@ function formatTimeOfDay(hours) {
   return `${hour12}:${String(displayMinutes).padStart(2, "0")} ${meridiem}`;
 }
 
+function getTwilightState() {
+  const sunRa = astroState.solarRightAscensionHours;
+  const sunDec = astroState.solarDeclinationDegrees;
+  const { lat } = equatorialToHorizontal(sunRa, sunDec);
+
+  if (lat >= 0) {
+    return { key: "day", label: "DAY" };
+  }
+  if (lat >= -6) {
+    return { key: "civil", label: "CIVIL" };
+  }
+  if (lat >= -12) {
+    return { key: "naut", label: "NAUT" };
+  }
+  if (lat >= -18) {
+    return { key: "astro", label: "ASTRO" };
+  }
+  return { key: "night", label: "NIGHT" };
+}
+
 function formatSeasonDay(day) {
   const date = dayOfYearToDate(wrapDayOfYear(day));
   return date.toLocaleDateString(undefined, { month: "short", day: "numeric" });
@@ -1676,15 +1836,28 @@ function formatSeasonDay(day) {
 
 function updateTimeWheel() {
   const formatted = formatTimeOfDay(state.timeOfDayHours);
+  const twilight = getTwilightState();
   timeOfDayValue.textContent = formatted;
+  timeOfDayStatus.textContent = twilight.label;
+  timeOfDayWheel.classList.remove(
+    "time-status-day",
+    "time-status-civil",
+    "time-status-naut",
+    "time-status-astro",
+    "time-status-night"
+  );
+  timeOfDayWheel.classList.add(`time-status-${twilight.key}`);
   timeOfDayWheel.setAttribute("aria-valuenow", state.timeOfDayHours.toFixed(2));
-  timeOfDayWheel.setAttribute("aria-valuetext", formatted);
+  timeOfDayWheel.setAttribute("aria-valuetext", `${formatted}, ${twilight.label}`);
 }
 
 function setTimeOfDay(hours) {
   state.timeOfDayHours = wrapHours(hours);
+  liveState.usingCurrentDateTime = false;
+  updateAstroState();
   updateTimeWheel();
   updateInfoCard(state.hoverStar);
+  updateShortcutButtons();
   draw();
 }
 
@@ -1707,10 +1880,22 @@ function updateLatitudeUI() {
   observerLatitudeWheel.setAttribute("aria-valuetext", formatted);
 }
 
+function updateLongitudeUI() {
+  const eastWest = state.observerLongitude >= 0 ? "E" : "W";
+  const formatted = `${Math.abs(state.observerLongitude).toFixed(1)}° ${eastWest}`;
+  observerLongitudeValue.textContent = formatted;
+  observerLongitudeWheel.setAttribute("aria-valuenow", state.observerLongitude.toFixed(1));
+  observerLongitudeWheel.setAttribute("aria-valuetext", formatted);
+}
+
 function setSeasonDay(day) {
   state.seasonDay = wrapDayOfYear(day);
+  liveState.usingCurrentDateTime = false;
+  updateAstroState();
   updateSeasonWheel();
+  updateTimeWheel();
   updateInfoCard(state.hoverStar);
+  updateShortcutButtons();
   draw();
 }
 
@@ -1720,8 +1905,12 @@ function nudgeSeasonDay(deltaDays) {
 
 function setObserverLatitude(latitude) {
   state.observerLatitude = clamp(latitude, -90, 90);
+  liveState.usingCurrentLocation = false;
+  updateAstroState();
   updateLatitudeUI();
+  updateTimeWheel();
   updateInfoCard(state.hoverStar);
+  updateShortcutButtons();
   draw();
 }
 
@@ -1729,19 +1918,32 @@ function nudgeObserverLatitude(deltaDegrees) {
   setObserverLatitude(state.observerLatitude + deltaDegrees);
 }
 
-function setNowFromDevice() {
-  const now = new Date();
-  setSeasonDay(getDayOfYear(now));
-  setTimeOfDay(now.getHours() + now.getMinutes() / 60);
+function setObserverLongitude(longitude) {
+  state.observerLongitude = clamp(longitude, -180, 180);
+  liveState.usingCurrentLocation = false;
+  updateAstroState();
+  updateLongitudeUI();
+  updateInfoCard(state.hoverStar);
+  updateShortcutButtons();
+  updateTimeWheel();
+  draw();
 }
 
-function flashButtonLabel(button, label, timeout = 1400) {
-  const originalLabel = button.dataset.originalLabel || button.textContent;
-  button.dataset.originalLabel = originalLabel;
-  button.textContent = label;
-  window.setTimeout(() => {
-    button.textContent = originalLabel;
-  }, timeout);
+function nudgeObserverLongitude(deltaDegrees) {
+  setObserverLongitude(state.observerLongitude + deltaDegrees);
+}
+
+function setNowFromDevice() {
+  const now = new Date();
+  state.seasonDay = getDayOfYear(now);
+  state.timeOfDayHours = wrapHours(now.getHours() + now.getMinutes() / 60);
+  liveState.usingCurrentDateTime = true;
+  updateAstroState();
+  updateSeasonWheel();
+  updateTimeWheel();
+  updateInfoCard(state.hoverStar);
+  updateShortcutButtons();
+  draw();
 }
 
 function draw() {
@@ -1922,7 +2124,12 @@ canvas.addEventListener("wheel", (event) => {
 }, { passive: false });
 
 labelsVisibilitySelect.addEventListener("click", () => {
-  state.labelsVisibility = state.labelsVisibility === "on" ? "off" : "on";
+  state.labelsVisibility =
+    state.labelsVisibility === "off"
+      ? "minimal"
+      : state.labelsVisibility === "minimal"
+        ? "full"
+        : "off";
   updateSettingsButtons();
   draw();
 });
@@ -2137,24 +2344,89 @@ observerLatitudeWheel.addEventListener("keydown", (event) => {
   }
 });
 
+observerLongitudeWheel.addEventListener("wheel", (event) => {
+  event.preventDefault();
+  const delta = Math.abs(event.deltaY) < 2 ? -event.deltaY : -Math.sign(event.deltaY);
+  nudgeObserverLongitude(delta);
+}, { passive: false });
+
+observerLongitudeWheel.addEventListener("pointerdown", (event) => {
+  event.preventDefault();
+  longitudeWheelGesture.active = true;
+  longitudeWheelGesture.startX = event.clientX;
+  longitudeWheelGesture.accumulatedDegrees = 0;
+  observerLongitudeWheel.classList.add("dragging");
+  observerLongitudeWheel.setPointerCapture(event.pointerId);
+});
+
+observerLongitudeWheel.addEventListener("pointermove", (event) => {
+  if (!longitudeWheelGesture.active) {
+    return;
+  }
+
+  const deltaX = event.clientX - longitudeWheelGesture.startX;
+  const totalDegrees = deltaX / 8;
+  const stepDegrees = totalDegrees - longitudeWheelGesture.accumulatedDegrees;
+
+  if (Math.abs(stepDegrees) >= 0.2) {
+    longitudeWheelGesture.accumulatedDegrees = totalDegrees;
+    nudgeObserverLongitude(stepDegrees);
+  }
+});
+
+function releaseLongitudeWheel(pointerId) {
+  longitudeWheelGesture.active = false;
+  longitudeWheelGesture.startX = 0;
+  longitudeWheelGesture.accumulatedDegrees = 0;
+  observerLongitudeWheel.classList.remove("dragging");
+  if (pointerId !== undefined && observerLongitudeWheel.hasPointerCapture(pointerId)) {
+    observerLongitudeWheel.releasePointerCapture(pointerId);
+  }
+}
+
+observerLongitudeWheel.addEventListener("pointerup", (event) => {
+  releaseLongitudeWheel(event.pointerId);
+});
+
+observerLongitudeWheel.addEventListener("pointercancel", (event) => {
+  releaseLongitudeWheel(event.pointerId);
+});
+
+observerLongitudeWheel.addEventListener("keydown", (event) => {
+  if (event.key === "ArrowUp" || event.key === "ArrowRight") {
+    event.preventDefault();
+    nudgeObserverLongitude(0.5);
+  } else if (event.key === "ArrowDown" || event.key === "ArrowLeft") {
+    event.preventDefault();
+    nudgeObserverLongitude(-0.5);
+  }
+});
+
 useCurrentLocationButton.addEventListener("click", () => {
   if (!navigator.geolocation) {
-    flashButtonLabel(useCurrentLocationButton, "No GPS");
     return;
   }
 
   useCurrentLocationButton.disabled = true;
-  useCurrentLocationButton.textContent = "Locating";
 
   navigator.geolocation.getCurrentPosition(
     (position) => {
-      setObserverLatitude(position.coords.latitude);
+      liveState.currentLocationLatitude = position.coords.latitude;
+      liveState.currentLocationLongitude = position.coords.longitude;
+      state.observerLatitude = clamp(position.coords.latitude, -90, 90);
+      state.observerLongitude = clamp(position.coords.longitude, -180, 180);
+      liveState.usingCurrentLocation = true;
+      updateAstroState();
+      updateLatitudeUI();
+      updateLongitudeUI();
+      updateTimeWheel();
+      updateInfoCard(state.hoverStar);
+      updateShortcutButtons();
+      draw();
       useCurrentLocationButton.disabled = false;
-      flashButtonLabel(useCurrentLocationButton, "Set");
     },
     () => {
       useCurrentLocationButton.disabled = false;
-      flashButtonLabel(useCurrentLocationButton, "Denied");
     },
     {
       enableHighAccuracy: false,
@@ -2166,17 +2438,19 @@ useCurrentLocationButton.addEventListener("click", () => {
 
 useCurrentDatetimeButton.addEventListener("click", () => {
   setNowFromDevice();
-  flashButtonLabel(useCurrentDatetimeButton, "Set");
 });
 
 window.addEventListener("resize", resizeCanvas);
 
+updateAstroState();
 updateInfoCard(state.hoverStar);
 projectionDescription.textContent = projectionMetadata[state.projection].label;
 updateSettingsButtons();
 updateSeasonWheel();
 updateLatitudeUI();
+updateLongitudeUI();
 updateTimeWheel();
+updateShortcutButtons();
 fieldBrightnessValue.textContent = `${fieldBrightnessInput.value}%`;
 foregroundSizeValue.textContent = `${foregroundSizeInput.value}%`;
 milkyWayBrightnessValue.textContent = `${milkyWayBrightnessInput.value}%`;

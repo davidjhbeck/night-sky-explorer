@@ -15,7 +15,7 @@
       href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;700&family=Space+Mono:wght@400;700&display=swap"
       rel="stylesheet"
     />
-    <link rel="stylesheet" href="./styles.css?v=26" />
+    <link rel="stylesheet" href="./styles.css?v=27" />
   </head>
   <body>
     <main class="app-shell">
@@ -46,7 +46,7 @@
             <div class="settings-toggle-row" aria-label="Quick settings">
               <button type="button" class="settings-toggle-button" id="labels-visibility">
                 <span class="settings-toggle-label">Labels</span>
-                <span class="settings-toggle-value" id="labels-visibility-value">On</span>
+                <span class="settings-toggle-value" id="labels-visibility-value">Full</span>
               </button>
 
               <button type="button" class="settings-toggle-button" id="pattern-detail">
@@ -140,6 +140,20 @@
                     <span id="observer-latitude-value">42.0° N</span>
                   </div>
                 </label>
+                <label class="overlay-control overlay-longitude" for="observer-longitude-wheel">
+                  <span class="overlay-control-label">Longitude</span>
+                  <div
+                    id="observer-longitude-wheel"
+                    class="time-wheel"
+                    role="spinbutton"
+                    tabindex="0"
+                    aria-label="Adjust observer longitude"
+                    aria-valuemin="-180"
+                    aria-valuemax="180"
+                  >
+                    <span id="observer-longitude-value">83.0° W</span>
+                  </div>
+                </label>
                 <label class="overlay-control overlay-date" for="season-day">
                   <span class="overlay-control-label">Date</span>
                   <div
@@ -165,7 +179,8 @@
                     aria-valuemin="0"
                     aria-valuemax="23.75"
                   >
-                    <span id="time-of-day-value">10:00 PM</span>
+                    <span class="time-wheel-status" id="time-of-day-status">NIGHT</span>
+                    <span class="time-wheel-main" id="time-of-day-value">10:00 PM</span>
                   </div>
                 </label>
               </div>
@@ -179,6 +194,6 @@
       </section>
     </main>
 
-    <script src="./app.js?v=26"></script>
+    <script src="./app.js?v=27"></script>
   </body>
 </html>
