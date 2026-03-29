@@ -118,6 +118,7 @@ h1 {
 
 .mobile-controls-shell {
   display: block;
+  position: relative;
 }
 
 .mobile-controls-toggle {
@@ -131,8 +132,9 @@ h1 {
   background: linear-gradient(180deg, rgba(63, 34, 9, 0.92), rgba(28, 16, 6, 0.9));
   box-shadow: inset 0 1px 0 rgba(255, 232, 187, 0.08);
   color: var(--text);
-  font-weight: 500;
   font: inherit;
+  font-weight: 600;
+  letter-spacing: 0.02em;
   text-align: left;
   cursor: pointer;
   position: sticky;
@@ -162,8 +164,7 @@ h1 {
 #asterism-visibility,
 #deep-sky-visibility,
 #coordinate-system,
-#observer-latitude,
-#season-day {
+#observer-latitude {
   min-width: 240px;
   padding: 12px 14px;
   border: 1px solid rgba(159, 208, 255, 0.22);
@@ -288,11 +289,13 @@ h1 {
 }
 
 .overlay-date {
-  width: 130px;
+  width: 50%;
+  flex: 1 1 50%;
 }
 
 .overlay-time {
-  width: 132px;
+  width: 50%;
+  flex: 1 1 50%;
   min-width: 0;
 }
 
@@ -325,23 +328,6 @@ h1 {
   color: #fff1d0;
 }
 
-#season-day {
-  width: 100%;
-  min-width: 0;
-  padding: 10px 12px;
-  border: 1px solid rgba(159, 208, 255, 0.22);
-  border-radius: 12px;
-  font: inherit;
-  color: var(--text);
-  background: rgba(4, 10, 21, 0.88);
-  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.03);
-}
-
-#season-day:focus {
-  outline: 2px solid rgba(159, 208, 255, 0.5);
-  outline-offset: 2px;
-}
-
 .overlay-dock *,
 .overlay-card * {
   pointer-events: auto;
@@ -352,8 +338,11 @@ h1 {
   .mobile-controls-shell {
     display: flex;
     flex-direction: column;
-    max-height: min(36vh, 280px);
+    width: 100%;
+    max-height: min(42svh, 340px);
     overflow: hidden;
+    border-top: 1px solid rgba(246, 184, 104, 0.14);
+    background: rgba(7, 14, 27, 0.84);
   }
 
   .mobile-controls-shell[open] {
@@ -400,9 +389,13 @@ h1 {
 
   .mobile-controls-toggle {
     display: block;
-    width: calc(100% - 28px);
-    margin: 8px 14px 0;
-    padding: 8px 12px;
+    width: auto;
+    margin: 0;
+    padding: 10px 14px;
+    border-radius: 0;
+    border-left: 0;
+    border-right: 0;
+    border-top: 0;
     font-size: 0.88rem;
   }
 
@@ -411,16 +404,26 @@ h1 {
   }
 
   .projection-controls {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr);
     overflow-y: auto;
     -webkit-overflow-scrolling: touch;
-    padding: 10px 14px 12px;
-    gap: 10px;
+    overscroll-behavior: contain;
+    max-height: min(34svh, 280px);
+    padding: 10px 12px 12px;
+    gap: 8px;
     scrollbar-width: thin;
+    background:
+      linear-gradient(180deg, rgba(255, 255, 255, 0.03), transparent 20px),
+      rgba(4, 10, 20, 0.24);
   }
 
   .projection-select-wrap {
     width: 100%;
     gap: 4px;
+    padding: 6px 8px 8px;
+    border-radius: 12px;
+    background: rgba(255, 255, 255, 0.03);
   }
 
   #projection-select,
@@ -480,19 +483,19 @@ h1 {
   .overlay-dock {
     width: 100%;
     padding: 10px 12px;
-    gap: 10px;
-    align-items: center;
+    gap: 8px;
+    align-items: stretch;
     max-width: 100%;
   }
 
   .overlay-date {
-    width: 112px;
-    flex: 0 0 112px;
+    width: 50%;
+    flex: 1 1 50%;
   }
 
   .overlay-time {
-    flex: 0 0 124px;
-    width: 124px;
+    width: 50%;
+    flex: 1 1 50%;
   }
 }
 
@@ -527,9 +530,9 @@ h1 {
   }
 
   .mobile-controls-toggle {
-    margin: 6px 12px 0;
-    width: calc(100% - 24px);
-    padding: 8px 11px;
+    margin: 0;
+    width: 100%;
+    padding: 10px 12px;
   }
 
   .projection-controls {
@@ -571,8 +574,8 @@ h1 {
     right: 10px;
     bottom: 10px;
     display: grid;
-    grid-template-columns: minmax(92px, 108px) minmax(0, 1fr);
-    align-items: end;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    align-items: stretch;
     width: auto;
     padding: 8px 10px;
   }
@@ -582,11 +585,12 @@ h1 {
   }
 
   .overlay-date {
-    width: auto;
-    flex: initial;
+    width: 100%;
+    flex: 1 1 50%;
   }
 
   .overlay-time {
     width: 100%;
+    flex: 1 1 50%;
   }
 }

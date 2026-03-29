@@ -492,7 +492,8 @@ const coordinateSystemSelect = document.getElementById("coordinate-system");
 const observerLatitudeInput = document.getElementById("observer-latitude");
 const timeOfDayWheel = document.getElementById("time-of-day");
 const timeOfDayValue = document.getElementById("time-of-day-value");
-const seasonDaySelect = document.getElementById("season-day");
+const seasonDayWheel = document.getElementById("season-day");
+const seasonDayValue = document.getElementById("season-day-value");
 const fieldBrightnessInput = document.getElementById("field-brightness");
 const fieldBrightnessValue = document.getElementById("field-brightness-value");
 const foregroundSizeInput = document.getElementById("foreground-size");
@@ -563,6 +564,11 @@ const timeWheelGesture = {
   startY: 0,
   accumulatedHours: 0
 };
+const seasonWheelGesture = {
+  active: false,
+  startY: 0,
+  accumulatedDays: 0
+};
 
 function deltaToPixels(delta, deltaMode, viewportSize) {
   if (deltaMode === WheelEvent.DOM_DELTA_PIXEL) {
@@ -603,6 +609,11 @@ function dayOfYearToDate(day, year = currentSeasonYear) {
 
 function clamp(value, min, max) {
   return Math.min(max, Math.max(min, value));
+}
+
+function wrapDayOfYear(day) {
+  const daysInYear = getDaysInYear(currentSeasonYear);
+  return ((Math.round(day) - 1 + daysInYear) % daysInYear) + 1;
 }
 
 function wrapDegrees(degrees) {
@@ -944,6 +955,37 @@ function drawGrid() {
   ctx.restore();
 }
 
+function drawHorizonLine() {
+  if (state.coordinateSystem !== "horizontal") {
+    return;
+  }
+
+  ctx.save();
+  ctx.strokeStyle = "rgba(246, 184, 104, 0.32)";
+  ctx.lineWidth = 1.2;
+
+  let hasSegment = false;
+  ctx.beginPath();
+
+  for (let lon = 0; lon <= 360; lon += 2) {
+    const point = lonLatToScreen(lon, 0);
+    if (!point) {
+      hasSegment = false;
+      continue;
+    }
+
+    if (!hasSegment) {
+      ctx.moveTo(point.x, point.y);
+      hasSegment = true;
+    } else {
+      ctx.lineTo(point.x, point.y);
+    }
+  }
+
+  ctx.stroke();
+  ctx.restore();
+}
+
 function drawCardinalDirections() {
   if (state.coordinateSystem !== "horizontal") {
     return;
@@ -1212,7 +1254,7 @@ function formatTimeOfDay(hours) {
 }
 
 function formatSeasonDay(day) {
-  const date = dayOfYearToDate(clamp(Math.round(day), 1, getDaysInYear(currentSeasonYear)));
+  const date = dayOfYearToDate(wrapDayOfYear(day));
   return date.toLocaleDateString(undefined, { month: "short", day: "numeric" });
 }
 
@@ -1234,24 +1276,29 @@ function nudgeTimeOfDay(deltaHours) {
   setTimeOfDay(state.timeOfDayHours + deltaHours);
 }
 
-function populateSeasonOptions() {
-  const daysInYear = getDaysInYear(currentSeasonYear);
+function updateSeasonWheel() {
+  const formatted = formatSeasonDay(state.seasonDay);
+  seasonDayValue.textContent = formatted;
+  seasonDayWheel.setAttribute("aria-valuenow", String(state.seasonDay));
+  seasonDayWheel.setAttribute("aria-valuetext", formatted);
+}
 
-  for (let day = 1; day <= daysInYear; day += 1) {
-    const option = document.createElement("option");
-    option.value = String(day);
-    option.textContent = dayOfYearToDate(day).toLocaleDateString(undefined, {
-      month: "short",
-      day: "numeric"
-    });
-    seasonDaySelect.append(option);
-  }
+function setSeasonDay(day) {
+  state.seasonDay = wrapDayOfYear(day);
+  updateSeasonWheel();
+  updateInfoCard(state.hoverStar);
+  draw();
+}
+
+function nudgeSeasonDay(deltaDays) {
+  setSeasonDay(state.seasonDay + deltaDays);
 }
 
 function draw() {
   ctx.clearRect(0, 0, canvas.clientWidth, canvas.clientHeight);
   drawBackdrop();
   drawGrid();
+  drawHorizonLine();
   drawCardinalDirections();
   drawConstellations();
   drawAsterisms();
@@ -1455,12 +1502,6 @@ observerLatitudeInput.addEventListener("input", (event) => {
   draw();
 });
 
-seasonDaySelect.addEventListener("change", (event) => {
-  state.seasonDay = clamp(Number(event.target.value) || 1, 1, getDaysInYear(currentSeasonYear));
-  updateInfoCard(state.hoverStar);
-  draw();
-});
-
 fieldBrightnessInput.addEventListener("input", (event) => {
   state.fieldStarBrightness = Number(event.target.value) / 100;
   fieldBrightnessValue.textContent = `${event.target.value}%`;
@@ -1531,9 +1572,66 @@ timeOfDayWheel.addEventListener("keydown", (event) => {
   }
 });
 
+seasonDayWheel.addEventListener("wheel", (event) => {
+  event.preventDefault();
+  const delta = Math.abs(event.deltaY) < 2 ? -event.deltaY : -Math.sign(event.deltaY);
+  nudgeSeasonDay(delta);
+}, { passive: false });
+
+seasonDayWheel.addEventListener("pointerdown", (event) => {
+  event.preventDefault();
+  seasonWheelGesture.active = true;
+  seasonWheelGesture.startY = event.clientY;
+  seasonWheelGesture.accumulatedDays = 0;
+  seasonDayWheel.classList.add("dragging");
+  seasonDayWheel.setPointerCapture(event.pointerId);
+});
+
+seasonDayWheel.addEventListener("pointermove", (event) => {
+  if (!seasonWheelGesture.active) {
+    return;
+  }
+
+  const deltaY = seasonWheelGesture.startY - event.clientY;
+  const totalDays = deltaY / 14;
+  const stepDays = totalDays - seasonWheelGesture.accumulatedDays;
+
+  if (Math.abs(stepDays) >= 0.3) {
+    seasonWheelGesture.accumulatedDays = totalDays;
+    nudgeSeasonDay(stepDays);
+  }
+});
+
+function releaseSeasonWheel(pointerId) {
+  seasonWheelGesture.active = false;
+  seasonWheelGesture.startY = 0;
+  seasonWheelGesture.accumulatedDays = 0;
+  seasonDayWheel.classList.remove("dragging");
+  if (pointerId !== undefined && seasonDayWheel.hasPointerCapture(pointerId)) {
+    seasonDayWheel.releasePointerCapture(pointerId);
+  }
+}
+
+seasonDayWheel.addEventListener("pointerup", (event) => {
+  releaseSeasonWheel(event.pointerId);
+});
+
+seasonDayWheel.addEventListener("pointercancel", (event) => {
+  releaseSeasonWheel(event.pointerId);
+});
+
+seasonDayWheel.addEventListener("keydown", (event) => {
+  if (event.key === "ArrowUp" || event.key === "ArrowRight") {
+    event.preventDefault();
+    nudgeSeasonDay(1);
+  } else if (event.key === "ArrowDown" || event.key === "ArrowLeft") {
+    event.preventDefault();
+    nudgeSeasonDay(-1);
+  }
+});
+
 window.addEventListener("resize", resizeCanvas);
 
-populateSeasonOptions();
 updateInfoCard(state.hoverStar);
 projectionDescription.textContent = projectionMetadata[state.projection].label;
 projectionSelect.value = state.projection;
@@ -1542,7 +1640,7 @@ asterismVisibilitySelect.value = state.asterismVisibility;
 deepSkyVisibilitySelect.value = state.deepSkyVisibility;
 coordinateSystemSelect.value = state.coordinateSystem;
 observerLatitudeInput.value = state.observerLatitude.toFixed(1);
-seasonDaySelect.value = String(state.seasonDay);
+updateSeasonWheel();
 updateTimeWheel();
 fieldBrightnessValue.textContent = `${fieldBrightnessInput.value}%`;
 foregroundSizeValue.textContent = `${foregroundSizeInput.value}%`;

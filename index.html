@@ -144,7 +144,17 @@
             <div class="overlay-dock" aria-label="Date and time controls">
               <label class="overlay-control overlay-date" for="season-day">
                 <span class="overlay-control-label">Date</span>
-                <select id="season-day" aria-label="Choose date through the year"></select>
+                <div
+                  id="season-day"
+                  class="time-wheel"
+                  role="spinbutton"
+                  tabindex="0"
+                  aria-label="Adjust date through the year"
+                  aria-valuemin="1"
+                  aria-valuemax="366"
+                >
+                  <span id="season-day-value">Mar 29</span>
+                </div>
               </label>
               <label class="overlay-control overlay-time" for="time-of-day">
                 <span class="overlay-control-label">Time</span>
