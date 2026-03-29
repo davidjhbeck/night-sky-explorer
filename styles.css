@@ -158,7 +158,6 @@ h1 {
 #deep-sky-visibility,
 #coordinate-system,
 #observer-latitude,
-#time-of-day,
 #season-day {
   min-width: 240px;
   padding: 12px 14px;
@@ -176,7 +175,6 @@ h1 {
 #deep-sky-visibility:focus,
 #coordinate-system:focus,
 #observer-latitude:focus,
-#time-of-day:focus,
 #season-day:focus {
   outline: 2px solid rgba(159, 208, 255, 0.5);
   outline-offset: 2px;
@@ -291,6 +289,35 @@ h1 {
 .overlay-time {
   width: 132px;
   min-width: 0;
+}
+
+.time-wheel {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 44px;
+  width: 100%;
+  padding: 10px 12px;
+  border: 1px solid rgba(159, 208, 255, 0.22);
+  border-radius: 12px;
+  background: rgba(4, 10, 21, 0.88);
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.03);
+  font-family: "Space Mono", monospace;
+  font-size: 0.92rem;
+  color: var(--text);
+  user-select: none;
+  -webkit-user-select: none;
+  touch-action: none;
+}
+
+.time-wheel:focus {
+  outline: 2px solid rgba(159, 208, 255, 0.5);
+  outline-offset: 2px;
+}
+
+.time-wheel.dragging {
+  border-color: rgba(246, 184, 104, 0.42);
+  color: #fff1d0;
 }
 
 #season-day {

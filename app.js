@@ -490,7 +490,8 @@ const asterismVisibilitySelect = document.getElementById("asterism-visibility");
 const deepSkyVisibilitySelect = document.getElementById("deep-sky-visibility");
 const coordinateSystemSelect = document.getElementById("coordinate-system");
 const observerLatitudeInput = document.getElementById("observer-latitude");
-const timeOfDayInput = document.getElementById("time-of-day");
+const timeOfDayWheel = document.getElementById("time-of-day");
+const timeOfDayValue = document.getElementById("time-of-day-value");
 const seasonDaySelect = document.getElementById("season-day");
 const fieldBrightnessInput = document.getElementById("field-brightness");
 const fieldBrightnessValue = document.getElementById("field-brightness-value");
@@ -556,6 +557,11 @@ const pointerGesture = {
   moved: false,
   startX: 0,
   startY: 0
+};
+const timeWheelGesture = {
+  active: false,
+  startY: 0,
+  accumulatedHours: 0
 };
 
 function deltaToPixels(delta, deltaMode, viewportSize) {
@@ -635,12 +641,20 @@ function getSkyCoordinates(ra, dec) {
 function getSeasonOffsetHours() {
   const daysInYear = getDaysInYear(currentSeasonYear);
   const vernalEquinoxDay = clamp(Math.round((79 / 365) * daysInYear), 1, daysInYear);
-  return ((state.seasonDay - vernalEquinoxDay) / daysInYear) * 24;
+  return wrapHours(((state.seasonDay - vernalEquinoxDay) / daysInYear) * 24);
+}
+
+function getSolarRightAscensionHours() {
+  return getSeasonOffsetHours();
+}
+
+function getLocalSiderealHours() {
+  return wrapHours(getSolarRightAscensionHours() + state.timeOfDayHours - 12);
 }
 
 function equatorialToHorizontal(ra, dec) {
   const latitude = (state.observerLatitude * Math.PI) / 180;
-  const localSkyHours = wrapHours(state.timeOfDayHours + getSeasonOffsetHours());
+  const localSkyHours = getLocalSiderealHours();
   const hourAngle = ((localSkyHours - ra) * Math.PI) / 12;
   const declination = (dec * Math.PI) / 180;
   const sinDeclination = Math.sin(declination);
@@ -1202,13 +1216,22 @@ function formatSeasonDay(day) {
   return date.toLocaleDateString(undefined, { month: "short", day: "numeric" });
 }
 
-function populateTimeOptions() {
-  for (let hour = 0; hour < 24; hour += 1) {
-    const option = document.createElement("option");
-    option.value = String(hour);
-    option.textContent = formatTimeOfDay(hour);
-    timeOfDayInput.append(option);
-  }
+function updateTimeWheel() {
+  const formatted = formatTimeOfDay(state.timeOfDayHours);
+  timeOfDayValue.textContent = formatted;
+  timeOfDayWheel.setAttribute("aria-valuenow", state.timeOfDayHours.toFixed(2));
+  timeOfDayWheel.setAttribute("aria-valuetext", formatted);
+}
+
+function setTimeOfDay(hours) {
+  state.timeOfDayHours = wrapHours(hours);
+  updateTimeWheel();
+  updateInfoCard(state.hoverStar);
+  draw();
+}
+
+function nudgeTimeOfDay(deltaHours) {
+  setTimeOfDay(state.timeOfDayHours + deltaHours);
 }
 
 function populateSeasonOptions() {
@@ -1432,12 +1455,6 @@ observerLatitudeInput.addEventListener("input", (event) => {
   draw();
 });
 
-timeOfDayInput.addEventListener("change", (event) => {
-  state.timeOfDayHours = Number(event.target.value);
-  updateInfoCard(state.hoverStar);
-  draw();
-});
-
 seasonDaySelect.addEventListener("change", (event) => {
   state.seasonDay = clamp(Number(event.target.value) || 1, 1, getDaysInYear(currentSeasonYear));
   updateInfoCard(state.hoverStar);
@@ -1456,9 +1473,66 @@ foregroundSizeInput.addEventListener("input", (event) => {
   draw();
 });
 
+timeOfDayWheel.addEventListener("wheel", (event) => {
+  event.preventDefault();
+  const delta = Math.abs(event.deltaY) < 2 ? -event.deltaY : -Math.sign(event.deltaY);
+  nudgeTimeOfDay(delta);
+}, { passive: false });
+
+timeOfDayWheel.addEventListener("pointerdown", (event) => {
+  event.preventDefault();
+  timeWheelGesture.active = true;
+  timeWheelGesture.startY = event.clientY;
+  timeWheelGesture.accumulatedHours = 0;
+  timeOfDayWheel.classList.add("dragging");
+  timeOfDayWheel.setPointerCapture(event.pointerId);
+});
+
+timeOfDayWheel.addEventListener("pointermove", (event) => {
+  if (!timeWheelGesture.active) {
+    return;
+  }
+
+  const deltaY = timeWheelGesture.startY - event.clientY;
+  const totalHours = deltaY / 26;
+  const stepHours = totalHours - timeWheelGesture.accumulatedHours;
+
+  if (Math.abs(stepHours) >= 0.08) {
+    timeWheelGesture.accumulatedHours = totalHours;
+    nudgeTimeOfDay(stepHours);
+  }
+});
+
+function releaseTimeWheel(pointerId) {
+  timeWheelGesture.active = false;
+  timeWheelGesture.startY = 0;
+  timeWheelGesture.accumulatedHours = 0;
+  timeOfDayWheel.classList.remove("dragging");
+  if (pointerId !== undefined && timeOfDayWheel.hasPointerCapture(pointerId)) {
+    timeOfDayWheel.releasePointerCapture(pointerId);
+  }
+}
+
+timeOfDayWheel.addEventListener("pointerup", (event) => {
+  releaseTimeWheel(event.pointerId);
+});
+
+timeOfDayWheel.addEventListener("pointercancel", (event) => {
+  releaseTimeWheel(event.pointerId);
+});
+
+timeOfDayWheel.addEventListener("keydown", (event) => {
+  if (event.key === "ArrowUp" || event.key === "ArrowRight") {
+    event.preventDefault();
+    nudgeTimeOfDay(0.5);
+  } else if (event.key === "ArrowDown" || event.key === "ArrowLeft") {
+    event.preventDefault();
+    nudgeTimeOfDay(-0.5);
+  }
+});
+
 window.addEventListener("resize", resizeCanvas);
 
-populateTimeOptions();
 populateSeasonOptions();
 updateInfoCard(state.hoverStar);
 projectionDescription.textContent = projectionMetadata[state.projection].label;
@@ -1469,7 +1543,7 @@ deepSkyVisibilitySelect.value = state.deepSkyVisibility;
 coordinateSystemSelect.value = state.coordinateSystem;
 observerLatitudeInput.value = state.observerLatitude.toFixed(1);
 seasonDaySelect.value = String(state.seasonDay);
-timeOfDayInput.value = String(state.timeOfDayHours);
+updateTimeWheel();
 fieldBrightnessValue.textContent = `${fieldBrightnessInput.value}%`;
 foregroundSizeValue.textContent = `${foregroundSizeInput.value}%`;
 resizeCanvas();

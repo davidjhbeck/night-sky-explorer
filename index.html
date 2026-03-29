@@ -148,7 +148,17 @@
               </label>
               <label class="overlay-control overlay-time" for="time-of-day">
                 <span class="overlay-control-label">Time</span>
-                <select id="time-of-day" aria-label="Choose local time of day"></select>
+                <div
+                  id="time-of-day"
+                  class="time-wheel"
+                  role="spinbutton"
+                  tabindex="0"
+                  aria-label="Adjust local time of day"
+                  aria-valuemin="0"
+                  aria-valuemax="23.75"
+                >
+                  <span id="time-of-day-value">10:00 PM</span>
+                </div>
               </label>
             </div>
           </div>
