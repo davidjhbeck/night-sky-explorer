@@ -543,6 +543,8 @@ const seasonDayWheel = document.getElementById("season-day");
 const seasonDayValue = document.getElementById("season-day-value");
 const observerLatitudeWheel = document.getElementById("observer-latitude-wheel");
 const observerLatitudeValue = document.getElementById("observer-latitude-value");
+const useCurrentLocationButton = document.getElementById("use-current-location");
+const useCurrentDatetimeButton = document.getElementById("use-current-datetime");
 const fieldBrightnessInput = document.getElementById("field-brightness");
 const fieldBrightnessValue = document.getElementById("field-brightness-value");
 const foregroundSizeInput = document.getElementById("foreground-size");
@@ -1727,6 +1729,21 @@ function nudgeObserverLatitude(deltaDegrees) {
   setObserverLatitude(state.observerLatitude + deltaDegrees);
 }
 
+function setNowFromDevice() {
+  const now = new Date();
+  setSeasonDay(getDayOfYear(now));
+  setTimeOfDay(now.getHours() + now.getMinutes() / 60);
+}
+
+function flashButtonLabel(button, label, timeout = 1400) {
+  const originalLabel = button.dataset.originalLabel || button.textContent;
+  button.dataset.originalLabel = originalLabel;
+  button.textContent = label;
+  window.setTimeout(() => {
+    button.textContent = originalLabel;
+  }, timeout);
+}
+
 function draw() {
   ctx.clearRect(0, 0, canvas.clientWidth, canvas.clientHeight);
   drawBackdrop();
@@ -2118,6 +2135,38 @@ observerLatitudeWheel.addEventListener("keydown", (event) => {
     event.preventDefault();
     nudgeObserverLatitude(-0.5);
   }
+});
+
+useCurrentLocationButton.addEventListener("click", () => {
+  if (!navigator.geolocation) {
+    flashButtonLabel(useCurrentLocationButton, "No GPS");
+    return;
+  }
+
+  useCurrentLocationButton.disabled = true;
+  useCurrentLocationButton.textContent = "Locating";
+
+  navigator.geolocation.getCurrentPosition(
+    (position) => {
+      setObserverLatitude(position.coords.latitude);
+      useCurrentLocationButton.disabled = false;
+      flashButtonLabel(useCurrentLocationButton, "Set");
+    },
+    () => {
+      useCurrentLocationButton.disabled = false;
+      flashButtonLabel(useCurrentLocationButton, "Denied");
+    },
+    {
+      enableHighAccuracy: false,
+      timeout: 10000,
+      maximumAge: 300000
+    }
+  );
+});
+
+useCurrentDatetimeButton.addEventListener("click", () => {
+  setNowFromDevice();
+  flashButtonLabel(useCurrentDatetimeButton, "Set");
 });
 
 window.addEventListener("resize", resizeCanvas);

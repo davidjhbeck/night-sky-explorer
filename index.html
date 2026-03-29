@@ -15,7 +15,7 @@
       href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;700&family=Space+Mono:wght@400;700&display=swap"
       rel="stylesheet"
     />
-    <link rel="stylesheet" href="./styles.css?v=25" />
+    <link rel="stylesheet" href="./styles.css?v=26" />
   </head>
   <body>
     <main class="app-shell">
@@ -125,54 +125,60 @@
               <p id="object-coords">RA 2.53h • Dec +89.3°</p>
             </div>
             <div class="overlay-dock" aria-label="Date and time controls">
-              <label class="overlay-control overlay-latitude" for="observer-latitude-wheel">
-                <span class="overlay-control-label">Latitude</span>
-                <div
-                  id="observer-latitude-wheel"
-                  class="time-wheel"
-                  role="spinbutton"
-                  tabindex="0"
-                  aria-label="Adjust observer latitude"
-                  aria-valuemin="-90"
-                  aria-valuemax="90"
-                >
-                  <span id="observer-latitude-value">42.0° N</span>
-                </div>
-              </label>
-              <label class="overlay-control overlay-date" for="season-day">
-                <span class="overlay-control-label">Date</span>
-                <div
-                  id="season-day"
-                  class="time-wheel"
-                  role="spinbutton"
-                  tabindex="0"
-                  aria-label="Adjust date through the year"
-                  aria-valuemin="1"
-                  aria-valuemax="366"
-                >
-                  <span id="season-day-value">Mar 29</span>
-                </div>
-              </label>
-              <label class="overlay-control overlay-time" for="time-of-day">
-                <span class="overlay-control-label">Time</span>
-                <div
-                  id="time-of-day"
-                  class="time-wheel"
-                  role="spinbutton"
-                  tabindex="0"
-                  aria-label="Adjust local time of day"
-                  aria-valuemin="0"
-                  aria-valuemax="23.75"
-                >
-                  <span id="time-of-day-value">10:00 PM</span>
-                </div>
-              </label>
+              <div class="overlay-slider-stack">
+                <label class="overlay-control overlay-latitude" for="observer-latitude-wheel">
+                  <span class="overlay-control-label">Latitude</span>
+                  <div
+                    id="observer-latitude-wheel"
+                    class="time-wheel"
+                    role="spinbutton"
+                    tabindex="0"
+                    aria-label="Adjust observer latitude"
+                    aria-valuemin="-90"
+                    aria-valuemax="90"
+                  >
+                    <span id="observer-latitude-value">42.0° N</span>
+                  </div>
+                </label>
+                <label class="overlay-control overlay-date" for="season-day">
+                  <span class="overlay-control-label">Date</span>
+                  <div
+                    id="season-day"
+                    class="time-wheel"
+                    role="spinbutton"
+                    tabindex="0"
+                    aria-label="Adjust date through the year"
+                    aria-valuemin="1"
+                    aria-valuemax="366"
+                  >
+                    <span id="season-day-value">Mar 29</span>
+                  </div>
+                </label>
+                <label class="overlay-control overlay-time" for="time-of-day">
+                  <span class="overlay-control-label">Time</span>
+                  <div
+                    id="time-of-day"
+                    class="time-wheel"
+                    role="spinbutton"
+                    tabindex="0"
+                    aria-label="Adjust local time of day"
+                    aria-valuemin="0"
+                    aria-valuemax="23.75"
+                  >
+                    <span id="time-of-day-value">10:00 PM</span>
+                  </div>
+                </label>
+              </div>
+              <div class="overlay-action-column">
+                <button type="button" class="overlay-action-button" id="use-current-location">Here</button>
+                <button type="button" class="overlay-action-button" id="use-current-datetime">Now</button>
+              </div>
             </div>
           </div>
         </div>
       </section>
     </main>
 
-    <script src="./app.js?v=25"></script>
+    <script src="./app.js?v=26"></script>
   </body>
 </html>
