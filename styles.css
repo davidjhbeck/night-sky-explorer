@@ -97,6 +97,19 @@ h1 {
   background: linear-gradient(180deg, rgba(255, 255, 255, 0.03), transparent);
 }
 
+.mobile-controls-toggle {
+  display: none;
+  width: calc(100% - 40px);
+  margin: 14px 20px 0;
+  padding: 11px 14px;
+  border: 1px solid rgba(159, 208, 255, 0.2);
+  border-radius: 14px;
+  background: rgba(4, 10, 21, 0.88);
+  color: var(--text);
+  font: inherit;
+  text-align: left;
+}
+
 .projection-controls {
   display: flex;
   flex-wrap: wrap;
@@ -216,15 +229,42 @@ h1 {
 @media (max-width: 720px) {
   .app-shell {
     width: min(100% - 20px, 1160px);
-    padding-top: 24px;
+    padding-top: 18px;
+  }
+
+  .hero {
+    margin-bottom: 14px;
+  }
+
+  .hero-copy {
+    display: none;
   }
 
   .viewer-toolbar {
     grid-template-columns: 1fr;
+    gap: 8px;
+    padding: 12px 14px;
   }
 
-  .viewer-frame {
-    min-height: 360px;
+  .mobile-controls-toggle {
+    display: block;
+    width: calc(100% - 28px);
+    margin: 10px 14px 0;
+  }
+
+  .projection-controls {
+    display: none;
+    padding: 12px 14px 0;
+    gap: 12px;
+  }
+
+  .projection-controls.mobile-open {
+    display: flex;
+  }
+
+  .projection-select-wrap {
+    width: 100%;
+    gap: 6px;
   }
 
   #projection-select,
@@ -243,11 +283,29 @@ h1 {
     width: 100%;
   }
 
+  .slider-row {
+    gap: 10px;
+  }
+
+  .slider-value {
+    min-width: 42px;
+    font-size: 0.75rem;
+  }
+
+  .viewer-frame {
+    min-height: 62vh;
+  }
+
   .viewer-overlay {
     padding: 12px;
   }
 
   .overlay-card {
-    padding: 14px;
+    width: min(250px, 100%);
+    padding: 12px;
+  }
+
+  .overlay-card h2 {
+    font-size: 1.12rem;
   }
 }

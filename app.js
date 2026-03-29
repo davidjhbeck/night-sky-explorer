@@ -483,8 +483,10 @@ const objectName = document.getElementById("object-name");
 const objectMeta = document.getElementById("object-meta");
 const objectCoords = document.getElementById("object-coords");
 const objectCard = document.getElementById("object-card");
+const mobileControlsToggle = document.getElementById("mobile-controls-toggle");
 const projectionSelect = document.getElementById("projection-select");
 const projectionDescription = document.getElementById("projection-description");
+const projectionControls = document.getElementById("projection-controls");
 const constellationDetailSelect = document.getElementById("constellation-detail");
 const asterismVisibilitySelect = document.getElementById("asterism-visibility");
 const deepSkyVisibilitySelect = document.getElementById("deep-sky-visibility");
@@ -1221,6 +1223,12 @@ foregroundSizeInput.addEventListener("input", (event) => {
   state.foregroundStarScale = Number(event.target.value) / 100;
   foregroundSizeValue.textContent = `${event.target.value}%`;
   draw();
+});
+
+mobileControlsToggle.addEventListener("click", () => {
+  const isOpen = projectionControls.classList.toggle("mobile-open");
+  mobileControlsToggle.setAttribute("aria-expanded", String(isOpen));
+  mobileControlsToggle.textContent = isOpen ? "Hide Controls" : "Controls";
 });
 
 window.addEventListener("resize", resizeCanvas);
