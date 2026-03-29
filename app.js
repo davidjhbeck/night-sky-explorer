@@ -631,7 +631,7 @@ const liveState = {
   usingCurrentDateTime: false
 };
 const astroState = {
-  localDate: getSelectedLocalDate(),
+  localDate: getSelectedLocalDateObject(),
   utcDate: currentDate,
   localSiderealHours: 0,
   solarRightAscensionHours: 0,
@@ -699,7 +699,7 @@ function updateSettingsButtons() {
 
 function updateShortcutButtons() {
   useCurrentLocationButton.classList.toggle("is-active", liveState.usingCurrentLocation);
-  const nowDifferenceMs = Math.abs(getSelectedLocalDate().getTime() - Date.now());
+  const nowDifferenceMs = Math.abs(getSelectedLocalDateObject().getTime() - Date.now());
   useCurrentDatetimeButton.classList.toggle(
     "is-active",
     liveState.usingCurrentDateTime && nowDifferenceMs < 5 * 60 * 1000
@@ -829,12 +829,23 @@ function getSelectedLocalDate() {
   const date = dayOfYearToDate(state.seasonDay);
   const wholeHours = Math.floor(state.timeOfDayHours);
   const minutes = Math.round((state.timeOfDayHours - wholeHours) * 60);
+  return {
+    year: currentSeasonYear,
+    month: date.getMonth(),
+    day: date.getDate(),
+    hours: wholeHours,
+    minutes
+  };
+}
+
+function getSelectedLocalDateObject() {
+  const localDate = getSelectedLocalDate();
   return new Date(
-    currentSeasonYear,
-    date.getMonth(),
-    date.getDate(),
-    wholeHours,
-    minutes,
+    localDate.year,
+    localDate.month,
+    localDate.day,
+    localDate.hours,
+    localDate.minutes,
     0,
     0
   );
@@ -843,11 +854,14 @@ function getSelectedLocalDate() {
 function getSelectedUtcDate() {
   const localDate = getSelectedLocalDate();
   const timezoneOffsetHours = estimateTimeZoneOffsetHours(
-    localDate,
+    new Date(localDate.year, localDate.month, localDate.day, localDate.hours, localDate.minutes),
     state.observerLongitude,
     state.observerLatitude
   );
-  return new Date(localDate.getTime() - timezoneOffsetHours * 3600000);
+  return new Date(
+    Date.UTC(localDate.year, localDate.month, localDate.day, localDate.hours, localDate.minutes) -
+      timezoneOffsetHours * 3600000
+  );
 }
 
 function getSolarRightAscensionHours(date = getSelectedUtcDate()) {
@@ -895,7 +909,7 @@ function getLocalSiderealHours(date = getSelectedUtcDate()) {
 }
 
 function updateAstroState() {
-  astroState.localDate = getSelectedLocalDate();
+  astroState.localDate = getSelectedLocalDateObject();
   astroState.utcDate = getSelectedUtcDate();
   astroState.localSiderealHours = getLocalSiderealHours(astroState.utcDate);
   astroState.solarRightAscensionHours = getSolarRightAscensionHours(astroState.utcDate);
