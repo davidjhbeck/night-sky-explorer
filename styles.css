@@ -638,6 +638,7 @@ h1 {
     padding: 4px 6px;
     gap: 4px;
     align-items: stretch;
+    grid-template-columns: minmax(0, 3fr) minmax(44px, 1fr);
     max-width: 100%;
   }
 
@@ -732,15 +733,11 @@ h1 {
     left: 10px;
     right: 10px;
     bottom: 20px;
-    display: flex;
-    flex-direction: column;
+    display: grid;
+    grid-template-columns: minmax(0, 3fr) minmax(44px, 1fr);
     align-items: stretch;
     width: auto;
     padding: 4px 6px;
-  }
-
-  .overlay-dock {
-    grid-template-columns: minmax(0, 1fr) auto;
   }
 
   .overlay-slider-stack {
@@ -750,6 +747,7 @@ h1 {
   .overlay-action-column {
     gap: 3px;
     min-width: 44px;
+    width: 100%;
   }
 
   .overlay-control-label {
