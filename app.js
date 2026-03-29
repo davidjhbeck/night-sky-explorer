@@ -699,7 +699,11 @@ function updateSettingsButtons() {
 
 function updateShortcutButtons() {
   useCurrentLocationButton.classList.toggle("is-active", liveState.usingCurrentLocation);
-  useCurrentDatetimeButton.classList.toggle("is-active", liveState.usingCurrentDateTime);
+  const nowDifferenceMs = Math.abs(getSelectedLocalDate().getTime() - Date.now());
+  useCurrentDatetimeButton.classList.toggle(
+    "is-active",
+    liveState.usingCurrentDateTime && nowDifferenceMs < 5 * 60 * 1000
+  );
 }
 
 function deltaToPixels(delta, deltaMode, viewportSize) {
