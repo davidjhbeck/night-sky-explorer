@@ -532,6 +532,10 @@ const labelsVisibilitySelect = document.getElementById("labels-visibility");
 const patternDetailSelect = document.getElementById("pattern-detail");
 const asterismVisibilitySelect = document.getElementById("asterism-visibility");
 const deepSkyVisibilitySelect = document.getElementById("deep-sky-visibility");
+const labelsVisibilityValue = document.getElementById("labels-visibility-value");
+const patternDetailValue = document.getElementById("pattern-detail-value");
+const asterismVisibilityValue = document.getElementById("asterism-visibility-value");
+const deepSkyVisibilityValue = document.getElementById("deep-sky-visibility-value");
 const mobileControlsShell = document.getElementById("mobile-controls-shell");
 const timeOfDayWheel = document.getElementById("time-of-day");
 const timeOfDayValue = document.getElementById("time-of-day-value");
@@ -632,6 +636,28 @@ const latitudeWheelGesture = {
   startX: 0,
   accumulatedDegrees: 0
 };
+
+function updateSettingsButtons() {
+  labelsVisibilitySelect.setAttribute("aria-label", `Text and labels: ${state.labelsVisibility === "on" ? "show all labels" : "hide all labels"}`);
+  labelsVisibilitySelect.setAttribute("aria-pressed", String(state.labelsVisibility === "on"));
+  labelsVisibilityValue.textContent = state.labelsVisibility === "on" ? "On" : "Off";
+  labelsVisibilitySelect.classList.toggle("is-active", state.labelsVisibility === "on");
+
+  patternDetailSelect.setAttribute("aria-label", `Pattern detail: ${state.constellationDetail}`);
+  patternDetailSelect.setAttribute("aria-pressed", String(state.constellationDetail === "full"));
+  patternDetailValue.textContent = state.constellationDetail === "full" ? "Full" : "Simple";
+  patternDetailSelect.classList.toggle("is-active", state.constellationDetail === "full");
+
+  asterismVisibilitySelect.setAttribute("aria-label", `Asterisms: ${state.asterismVisibility === "on" ? "show" : "off"}`);
+  asterismVisibilitySelect.setAttribute("aria-pressed", String(state.asterismVisibility === "on"));
+  asterismVisibilityValue.textContent = state.asterismVisibility === "on" ? "On" : "Off";
+  asterismVisibilitySelect.classList.toggle("is-active", state.asterismVisibility === "on");
+
+  deepSkyVisibilitySelect.setAttribute("aria-label", `Deep sky objects: ${state.deepSkyVisibility === "full" ? "full catalog" : "popular targets"}`);
+  deepSkyVisibilitySelect.setAttribute("aria-pressed", String(state.deepSkyVisibility === "full"));
+  deepSkyVisibilityValue.textContent = state.deepSkyVisibility === "full" ? "Full" : "Popular";
+  deepSkyVisibilitySelect.classList.toggle("is-active", state.deepSkyVisibility === "full");
+}
 
 function deltaToPixels(delta, deltaMode, viewportSize) {
   if (deltaMode === WheelEvent.DOM_DELTA_PIXEL) {
@@ -1878,23 +1904,27 @@ canvas.addEventListener("wheel", (event) => {
   draw();
 }, { passive: false });
 
-labelsVisibilitySelect.addEventListener("change", (event) => {
-  state.labelsVisibility = event.target.value;
+labelsVisibilitySelect.addEventListener("click", () => {
+  state.labelsVisibility = state.labelsVisibility === "on" ? "off" : "on";
+  updateSettingsButtons();
   draw();
 });
 
-patternDetailSelect.addEventListener("change", (event) => {
-  state.constellationDetail = event.target.value;
+patternDetailSelect.addEventListener("click", () => {
+  state.constellationDetail = state.constellationDetail === "full" ? "simple" : "full";
+  updateSettingsButtons();
   draw();
 });
 
-asterismVisibilitySelect.addEventListener("change", (event) => {
-  state.asterismVisibility = event.target.value;
+asterismVisibilitySelect.addEventListener("click", () => {
+  state.asterismVisibility = state.asterismVisibility === "on" ? "off" : "on";
+  updateSettingsButtons();
   draw();
 });
 
-deepSkyVisibilitySelect.addEventListener("change", (event) => {
-  state.deepSkyVisibility = event.target.value;
+deepSkyVisibilitySelect.addEventListener("click", () => {
+  state.deepSkyVisibility = state.deepSkyVisibility === "popular" ? "full" : "popular";
+  updateSettingsButtons();
   draw();
 });
 
@@ -2094,10 +2124,7 @@ window.addEventListener("resize", resizeCanvas);
 
 updateInfoCard(state.hoverStar);
 projectionDescription.textContent = projectionMetadata[state.projection].label;
-labelsVisibilitySelect.value = state.labelsVisibility;
-patternDetailSelect.value = state.constellationDetail;
-asterismVisibilitySelect.value = state.asterismVisibility;
-deepSkyVisibilitySelect.value = state.deepSkyVisibility;
+updateSettingsButtons();
 updateSeasonWheel();
 updateLatitudeUI();
 updateTimeWheel();

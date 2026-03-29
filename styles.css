@@ -165,32 +165,79 @@ h1 {
   padding: 16px 20px 0;
 }
 
+.settings-toggle-row {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 8px;
+  width: 100%;
+}
+
+.settings-toggle-button {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  justify-content: center;
+  gap: 4px;
+  min-width: 0;
+  padding: 10px 10px 9px;
+  border: 1px solid rgba(159, 208, 255, 0.2);
+  border-radius: 12px;
+  background: rgba(4, 10, 21, 0.88);
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.03);
+  color: var(--text);
+  font: inherit;
+  text-align: left;
+  transition:
+    border-color 120ms ease,
+    background-color 120ms ease,
+    box-shadow 120ms ease,
+    transform 120ms ease;
+}
+
+.settings-toggle-button:focus {
+  outline: 2px solid rgba(159, 208, 255, 0.5);
+  outline-offset: 2px;
+}
+
+.settings-toggle-button.is-active {
+  border-color: rgba(246, 184, 104, 0.44);
+  background: linear-gradient(180deg, rgba(53, 30, 10, 0.94), rgba(24, 15, 8, 0.9));
+  box-shadow:
+    inset 0 1px 0 rgba(255, 235, 196, 0.08),
+    0 0 0 1px rgba(246, 184, 104, 0.06);
+}
+
+.settings-toggle-button.is-active .settings-toggle-label {
+  color: #ffd18b;
+}
+
+.settings-toggle-button.is-active .settings-toggle-value {
+  color: #fff1d0;
+}
+
+.settings-toggle-label {
+  font-family: "Space Mono", monospace;
+  font-size: 0.6rem;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: var(--accent);
+}
+
+.settings-toggle-value {
+  max-width: 100%;
+  font-size: 0.82rem;
+  font-weight: 600;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
 .projection-select-wrap {
   display: inline-flex;
   flex-direction: column;
   gap: 8px;
 }
 
-#projection-select,
-#labels-visibility,
-#pattern-detail,
-#asterism-visibility,
-#deep-sky-visibility {
-  min-width: 240px;
-  padding: 12px 14px;
-  border: 1px solid rgba(159, 208, 255, 0.22);
-  border-radius: 14px;
-  font: inherit;
-  color: var(--text);
-  background: rgba(4, 10, 21, 0.88);
-  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.03);
-}
-
-#projection-select:focus,
-#labels-visibility:focus,
-#pattern-detail:focus,
-#asterism-visibility:focus,
-#deep-sky-visibility:focus,
 #season-day:focus {
   outline: 2px solid rgba(159, 208, 255, 0.5);
   outline-offset: 2px;
@@ -463,6 +510,23 @@ h1 {
     background:
       linear-gradient(180deg, rgba(255, 255, 255, 0.03), transparent 20px),
       rgba(4, 10, 20, 0.24);
+  }
+
+  .settings-toggle-row {
+    gap: 6px;
+  }
+
+  .settings-toggle-button {
+    padding: 8px 8px 7px;
+    border-radius: 10px;
+  }
+
+  .settings-toggle-label {
+    font-size: 0.52rem;
+  }
+
+  .settings-toggle-value {
+    font-size: 0.72rem;
   }
 
   .projection-select-wrap {

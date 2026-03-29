@@ -43,85 +43,75 @@
         <details class="mobile-controls-shell" id="mobile-controls-shell">
           <summary class="mobile-controls-toggle">Settings</summary>
           <div class="projection-controls" id="projection-controls">
-          <label class="projection-select-wrap" for="labels-visibility">
-            <span class="toolbar-label">Text and labels</span>
-            <select id="labels-visibility" aria-label="Choose label visibility">
-              <option value="on" selected>Show all labels</option>
-              <option value="off">Hide all labels</option>
-            </select>
-          </label>
+            <div class="settings-toggle-row" aria-label="Quick settings">
+              <button type="button" class="settings-toggle-button" id="labels-visibility">
+                <span class="settings-toggle-label">Labels</span>
+                <span class="settings-toggle-value" id="labels-visibility-value">On</span>
+              </button>
 
-          <label class="projection-select-wrap" for="pattern-detail">
-            <span class="toolbar-label">Pattern detail</span>
-            <select id="pattern-detail" aria-label="Choose constellation and asterism detail">
-              <option value="simple">Simple</option>
-              <option value="full" selected>Full</option>
-            </select>
-          </label>
+              <button type="button" class="settings-toggle-button" id="pattern-detail">
+                <span class="settings-toggle-label">Pattern</span>
+                <span class="settings-toggle-value" id="pattern-detail-value">Full</span>
+              </button>
 
-          <label class="projection-select-wrap" for="asterism-visibility">
-            <span class="toolbar-label">Asterisms</span>
-            <select id="asterism-visibility" aria-label="Choose asterism visibility">
-              <option value="off">Off</option>
-              <option value="on" selected>Show famous asterisms</option>
-            </select>
-          </label>
+              <button type="button" class="settings-toggle-button" id="asterism-visibility">
+                <span class="settings-toggle-label">Asterisms</span>
+                <span class="settings-toggle-value" id="asterism-visibility-value">On</span>
+              </button>
 
-          <label class="projection-select-wrap" for="deep-sky-visibility">
-            <span class="toolbar-label">Deep-sky objects</span>
-            <select id="deep-sky-visibility" aria-label="Choose deep-sky object visibility">
-              <option value="popular">Popular targets</option>
-              <option value="full">Full catalog</option>
-            </select>
-          </label>
-
-          <label class="projection-select-wrap slider-wrap" for="field-brightness">
-            <span class="toolbar-label">Background star brightness</span>
-            <div class="slider-row">
-              <input
-                id="field-brightness"
-                type="range"
-                min="90"
-                max="230"
-                value="160"
-                step="1"
-                aria-label="Adjust background star brightness"
-              />
-              <span class="slider-value" id="field-brightness-value">160%</span>
+              <button type="button" class="settings-toggle-button" id="deep-sky-visibility">
+                <span class="settings-toggle-label">Deep Sky</span>
+                <span class="settings-toggle-value" id="deep-sky-visibility-value">Popular</span>
+              </button>
             </div>
-          </label>
 
-          <label class="projection-select-wrap slider-wrap" for="foreground-size">
-            <span class="toolbar-label">Foreground star size</span>
-            <div class="slider-row">
-              <input
-                id="foreground-size"
-                type="range"
-                min="35"
-                max="105"
-                value="70"
-                step="1"
-                aria-label="Adjust labeled star size"
-              />
-              <span class="slider-value" id="foreground-size-value">70%</span>
-            </div>
-          </label>
+            <label class="projection-select-wrap slider-wrap" for="field-brightness">
+              <span class="toolbar-label">Background star brightness</span>
+              <div class="slider-row">
+                <input
+                  id="field-brightness"
+                  type="range"
+                  min="90"
+                  max="230"
+                  value="160"
+                  step="1"
+                  aria-label="Adjust background star brightness"
+                />
+                <span class="slider-value" id="field-brightness-value">160%</span>
+              </div>
+            </label>
 
-          <label class="projection-select-wrap slider-wrap" for="milky-way-brightness">
-            <span class="toolbar-label">Milky Way brightness</span>
-            <div class="slider-row">
-              <input
-                id="milky-way-brightness"
-                type="range"
-                min="0"
-                max="100"
-                value="28"
-                step="1"
-                aria-label="Adjust Milky Way background brightness"
-              />
-              <span class="slider-value" id="milky-way-brightness-value">28%</span>
-            </div>
-          </label>
+            <label class="projection-select-wrap slider-wrap" for="foreground-size">
+              <span class="toolbar-label">Foreground star size</span>
+              <div class="slider-row">
+                <input
+                  id="foreground-size"
+                  type="range"
+                  min="35"
+                  max="105"
+                  value="70"
+                  step="1"
+                  aria-label="Adjust labeled star size"
+                />
+                <span class="slider-value" id="foreground-size-value">70%</span>
+              </div>
+            </label>
+
+            <label class="projection-select-wrap slider-wrap" for="milky-way-brightness">
+              <span class="toolbar-label">Milky Way brightness</span>
+              <div class="slider-row">
+                <input
+                  id="milky-way-brightness"
+                  type="range"
+                  min="0"
+                  max="100"
+                  value="28"
+                  step="1"
+                  aria-label="Adjust Milky Way background brightness"
+                />
+                <span class="slider-value" id="milky-way-brightness-value">28%</span>
+              </div>
+            </label>
           </div>
         </details>
 
