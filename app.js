@@ -29,6 +29,14 @@ const stars = [
   { id: "rigel", name: "Rigel", constellation: "Orion", ra: 5.24, dec: -8.2, mag: 0.13 },
   { id: "aldebaran", name: "Aldebaran", constellation: "Taurus", ra: 4.6, dec: 16.51, mag: 0.86 },
   { id: "elnath", name: "Elnath", constellation: "Taurus", ra: 5.44, dec: 28.61, mag: 1.65 },
+  { id: "alcyone", name: "Alcyone", constellation: "Taurus", ra: 3.79, dec: 24.11, mag: 2.85 },
+  { id: "atlas", name: "Atlas", constellation: "Taurus", ra: 3.82, dec: 24.05, mag: 3.62 },
+  { id: "electra", name: "Electra", constellation: "Taurus", ra: 3.75, dec: 24.11, mag: 3.7 },
+  { id: "maia", name: "Maia", constellation: "Taurus", ra: 3.76, dec: 24.37, mag: 3.87 },
+  { id: "merope", name: "Merope", constellation: "Taurus", ra: 3.77, dec: 23.95, mag: 4.17 },
+  { id: "taygeta", name: "Taygeta", constellation: "Taurus", ra: 3.75, dec: 24.47, mag: 4.29 },
+  { id: "pleione", name: "Pleione", constellation: "Taurus", ra: 3.82, dec: 24.14, mag: 5.05 },
+  { id: "celaeno", name: "Celaeno", constellation: "Taurus", ra: 3.74, dec: 24.29, mag: 5.45 },
   { id: "capella", name: "Capella", constellation: "Auriga", ra: 5.28, dec: 46.0, mag: 0.08 },
   { id: "menkalinan", name: "Menkalinan", constellation: "Auriga", ra: 5.99, dec: 44.95, mag: 1.9 },
   { id: "almach", name: "Almach", constellation: "Andromeda", ra: 2.07, dec: 42.33, mag: 2.1 },
@@ -576,7 +584,7 @@ const projectionMetadata = {
   }
 };
 
-const fieldStars = generateFieldStars(1120);
+const fieldStars = generateFieldStars(2200);
 const allStars = [...fieldStars, ...stars];
 const MAX_ZOOM = 12;
 const currentDate = new Date();
@@ -612,7 +620,7 @@ const state = {
   timeOfDayHours: 22,
   seasonDay: getDayOfYear(currentDate),
   fieldStarBrightness: 1.6,
-  foregroundStarScale: 0.7,
+  foregroundStarScale: 0.35,
   milkyWayBrightness: 0.28
 };
 
@@ -933,7 +941,7 @@ function setViewCenter(lon, lat) {
 function getProjectionScale() {
   return {
     x: canvas.clientWidth * 0.46 * state.zoom,
-    y: canvas.clientHeight * 0.46 * state.zoom
+    y: canvas.clientHeight * 0.46 * state.zoom * 0.8
   };
 }
 
@@ -974,7 +982,7 @@ function lonLatToScreen(lon, lat, offsetWrap = 0) {
     const k = 2 / denominator;
     const scale = {
       x: canvas.clientWidth * 0.23 * state.zoom,
-      y: canvas.clientHeight * 0.23 * state.zoom
+      y: canvas.clientHeight * 0.23 * state.zoom * 0.8
     };
     return {
       x: width / 2 - scale.x * k * cosPhi * sinLambda,
@@ -988,7 +996,7 @@ function lonLatToScreen(lon, lat, offsetWrap = 0) {
 
   return {
     x: width / 2 - ((diffDegrees / 15) / visibleHours) * width,
-    y: height / 2 - (diffDec / visibleDec) * height
+    y: height / 2 - (diffDec / visibleDec) * height * 0.8
   };
 }
 
@@ -1169,7 +1177,7 @@ function screenToLonLat(x, y) {
 
   if (state.projection === "stereographic") {
     const scaleX = canvas.clientWidth * 0.23 * state.zoom;
-    const scaleY = canvas.clientHeight * 0.23 * state.zoom;
+    const scaleY = canvas.clientHeight * 0.23 * state.zoom * 0.8;
     const projectedX = (width / 2 - x) / scaleX;
     const projectedY = (height / 2 - y) / scaleY;
     const rho = Math.hypot(projectedX, projectedY);
@@ -1199,7 +1207,7 @@ function screenToLonLat(x, y) {
   const visibleHours = 24 / state.zoom;
   const visibleDec = 180 / state.zoom;
   const diffHours = -((x - width / 2) / width) * visibleHours;
-  const diffDec = ((height / 2 - y) / height) * visibleDec;
+  const diffDec = ((height / 2 - y) / (height * 0.8)) * visibleDec;
   return {
     lon: wrapDegrees(center.lon + diffHours * 15),
     lat: center.lat + diffDec
@@ -2159,7 +2167,7 @@ fieldBrightnessInput.addEventListener("input", (event) => {
 });
 
 foregroundSizeInput.addEventListener("input", (event) => {
-  state.foregroundStarScale = Number(event.target.value) / 100;
+  state.foregroundStarScale = (Number(event.target.value) / 100) * 0.35;
   foregroundSizeValue.textContent = `${event.target.value}%`;
   draw();
 });

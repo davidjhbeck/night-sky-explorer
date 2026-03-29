@@ -336,7 +336,7 @@ h1 {
 .overlay-control {
   display: flex;
   flex-direction: column;
-  gap: 1px;
+  gap: 0;
   min-width: 0;
   width: 100%;
 }
@@ -414,9 +414,9 @@ h1 {
   display: flex;
   align-items: center;
   justify-content: center;
-  min-height: 24px;
+  min-height: 28px;
   width: 100%;
-  padding: 2px 9px;
+  padding: 3px 9px 3px 56px;
   border: 1px solid rgba(159, 208, 255, 0.22);
   border-radius: 12px;
   background: rgba(4, 10, 21, 0.88);
@@ -433,9 +433,23 @@ h1 {
   position: relative;
 }
 
+.time-wheel-inline-label {
+  position: absolute;
+  left: 8px;
+  top: 50%;
+  transform: translateY(-50%);
+  font-family: "Space Mono", monospace;
+  font-size: 0.42rem;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: rgba(159, 208, 255, 0.8);
+  pointer-events: none;
+  z-index: 1;
+}
+
 .time-wheel-main {
   position: relative;
-  z-index: 1;
+  z-index: 2;
 }
 
 .time-wheel-status {
@@ -703,9 +717,14 @@ h1 {
   }
 
   .time-wheel {
-    min-height: 23px;
-    padding: 2px 8px;
+    min-height: 26px;
+    padding: 3px 8px 3px 52px;
     font-size: 0.64rem;
+  }
+
+  .time-wheel-inline-label {
+    left: 7px;
+    font-size: 0.4rem;
   }
 }
 
@@ -782,7 +801,7 @@ h1 {
     position: absolute;
     left: 10px;
     right: 10px;
-    bottom: 20px;
+    bottom: calc(48px + env(safe-area-inset-bottom, 0px));
     display: grid;
     grid-template-columns: minmax(0, 3fr) minmax(44px, 1fr);
     align-items: stretch;
@@ -812,8 +831,13 @@ h1 {
   }
 
   .time-wheel {
-    min-height: 22px;
-    padding: 2px 8px;
+    min-height: 25px;
+    padding: 3px 8px 3px 50px;
     font-size: 0.62rem;
+  }
+
+  .time-wheel-inline-label {
+    left: 7px;
+    font-size: 0.38rem;
   }
 }

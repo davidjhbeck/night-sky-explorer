@@ -87,13 +87,13 @@
                 <input
                   id="foreground-size"
                   type="range"
-                  min="35"
-                  max="105"
-                  value="70"
+                  min="50"
+                  max="300"
+                  value="100"
                   step="1"
                   aria-label="Adjust labeled star size"
                 />
-                <span class="slider-value" id="foreground-size-value">70%</span>
+                <span class="slider-value" id="foreground-size-value">100%</span>
               </div>
             </label>
 
@@ -127,7 +127,6 @@
             <div class="overlay-dock" aria-label="Date and time controls">
               <div class="overlay-slider-stack">
                 <label class="overlay-control overlay-latitude" for="observer-latitude-wheel">
-                  <span class="overlay-control-label">Latitude</span>
                   <div
                     id="observer-latitude-wheel"
                     class="time-wheel"
@@ -137,11 +136,11 @@
                     aria-valuemin="-90"
                     aria-valuemax="90"
                   >
-                    <span id="observer-latitude-value">42.0° N</span>
+                    <span class="time-wheel-inline-label">Latitude</span>
+                    <span class="time-wheel-main" id="observer-latitude-value">42.0° N</span>
                   </div>
                 </label>
                 <label class="overlay-control overlay-longitude" for="observer-longitude-wheel">
-                  <span class="overlay-control-label">Longitude</span>
                   <div
                     id="observer-longitude-wheel"
                     class="time-wheel"
@@ -151,11 +150,11 @@
                     aria-valuemin="-180"
                     aria-valuemax="180"
                   >
-                    <span id="observer-longitude-value">83.0° W</span>
+                    <span class="time-wheel-inline-label">Longitude</span>
+                    <span class="time-wheel-main" id="observer-longitude-value">83.0° W</span>
                   </div>
                 </label>
                 <label class="overlay-control overlay-date" for="season-day">
-                  <span class="overlay-control-label">Date</span>
                   <div
                     id="season-day"
                     class="time-wheel"
@@ -165,11 +164,11 @@
                     aria-valuemin="1"
                     aria-valuemax="366"
                   >
-                    <span id="season-day-value">Mar 29</span>
+                    <span class="time-wheel-inline-label">Date</span>
+                    <span class="time-wheel-main" id="season-day-value">Mar 29</span>
                   </div>
                 </label>
                 <label class="overlay-control overlay-time" for="time-of-day">
-                  <span class="overlay-control-label">Time</span>
                   <div
                     id="time-of-day"
                     class="time-wheel"
@@ -179,6 +178,7 @@
                     aria-valuemin="0"
                     aria-valuemax="23.75"
                   >
+                    <span class="time-wheel-inline-label">Time</span>
                     <span class="time-wheel-status" id="time-of-day-status">NIGHT</span>
                     <span class="time-wheel-main" id="time-of-day-value">10:00 PM</span>
                   </div>
