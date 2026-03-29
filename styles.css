@@ -162,8 +162,7 @@ h1 {
 #projection-select,
 #labels-visibility,
 #asterism-visibility,
-#deep-sky-visibility,
-#observer-latitude {
+#deep-sky-visibility {
   min-width: 240px;
   padding: 12px 14px;
   border: 1px solid rgba(159, 208, 255, 0.22);
@@ -178,25 +177,7 @@ h1 {
 #labels-visibility:focus,
 #asterism-visibility:focus,
 #deep-sky-visibility:focus,
-#observer-latitude:focus,
 #season-day:focus {
-  outline: 2px solid rgba(159, 208, 255, 0.5);
-  outline-offset: 2px;
-}
-
-.control-button {
-  min-width: 240px;
-  padding: 12px 14px;
-  border: 1px solid rgba(159, 208, 255, 0.22);
-  border-radius: 14px;
-  font: inherit;
-  color: var(--text);
-  background: rgba(4, 10, 21, 0.88);
-  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.03);
-  text-align: left;
-}
-
-.control-button:focus {
   outline: 2px solid rgba(159, 208, 255, 0.5);
   outline-offset: 2px;
 }
@@ -258,74 +239,6 @@ h1 {
   z-index: 2;
 }
 
-.latitude-panel {
-  position: absolute;
-  top: 18px;
-  right: 18px;
-  z-index: 3;
-}
-
-.latitude-panel-card {
-  width: min(240px, calc(100vw - 36px));
-  padding: 14px 14px 12px;
-  border-radius: 18px;
-  border: 1px solid rgba(246, 184, 104, 0.18);
-  background: rgba(3, 8, 18, 0.84);
-  box-shadow: 0 16px 32px rgba(0, 0, 0, 0.28);
-  backdrop-filter: blur(12px);
-}
-
-.latitude-value {
-  margin: 0 0 10px;
-  color: #fff1d0;
-  font-family: "Space Mono", monospace;
-  font-size: 0.98rem;
-}
-
-.latitude-picker {
-  display: grid;
-  grid-template-columns: 32px minmax(0, 1fr);
-  gap: 12px;
-  align-items: stretch;
-}
-
-.latitude-slider {
-  writing-mode: vertical-lr;
-  direction: rtl;
-  width: 32px;
-  height: 160px;
-  margin: 0;
-  accent-color: #f6b868;
-}
-
-.us-map {
-  min-height: 160px;
-  border-radius: 14px;
-  border: 1px solid rgba(159, 208, 255, 0.14);
-  background:
-    linear-gradient(180deg, rgba(255, 255, 255, 0.02), transparent),
-    rgba(4, 10, 21, 0.8);
-  overflow: hidden;
-}
-
-.us-map-svg {
-  width: 100%;
-  height: 100%;
-  display: block;
-}
-
-.us-map-outline {
-  fill: rgba(152, 185, 255, 0.09);
-  stroke: rgba(152, 185, 255, 0.32);
-  stroke-width: 2.2;
-  stroke-linejoin: round;
-}
-
-.us-map-latitude {
-  stroke: rgba(246, 184, 104, 0.92);
-  stroke-width: 2.4;
-}
-
 .overlay-card {
   width: min(320px, 100%);
   padding: 16px 18px;
@@ -372,13 +285,18 @@ h1 {
 }
 
 .overlay-date {
-  width: 50%;
-  flex: 1 1 50%;
+  width: 33.333%;
+  flex: 1 1 33.333%;
+}
+
+.overlay-latitude {
+  width: 33.333%;
+  flex: 1 1 33.333%;
 }
 
 .overlay-time {
-  width: 50%;
-  flex: 1 1 50%;
+  width: 33.333%;
+  flex: 1 1 33.333%;
   min-width: 0;
 }
 
@@ -512,9 +430,7 @@ h1 {
   #projection-select,
   #labels-visibility,
   #asterism-visibility,
-  #deep-sky-visibility,
-  #observer-latitude,
-  .control-button {
+  #deep-sky-visibility {
     min-width: min(100%, 240px);
     width: 100%;
     padding: 10px 12px;
@@ -572,23 +488,18 @@ h1 {
   }
 
   .overlay-date {
-    width: 50%;
-    flex: 1 1 50%;
+    width: 33.333%;
+    flex: 1 1 33.333%;
+  }
+
+  .overlay-latitude {
+    width: 33.333%;
+    flex: 1 1 33.333%;
   }
 
   .overlay-time {
-    width: 50%;
-    flex: 1 1 50%;
-  }
-
-  .latitude-panel {
-    top: 12px;
-    right: 12px;
-  }
-
-  .latitude-panel-card {
-    width: min(224px, calc(100vw - 24px));
-    padding: 12px;
+    width: 33.333%;
+    flex: 1 1 33.333%;
   }
 }
 
@@ -632,27 +543,6 @@ h1 {
     padding: 8px 12px 10px;
   }
 
-  .latitude-panel {
-    top: 68px;
-    right: 10px;
-  }
-
-  .latitude-panel-card {
-    width: min(196px, calc(100vw - 20px));
-    padding: 10px;
-  }
-
-  .latitude-picker {
-    grid-template-columns: 28px minmax(0, 1fr);
-    gap: 10px;
-  }
-
-  .latitude-slider,
-  .us-map {
-    height: 138px;
-    min-height: 138px;
-  }
-
   .viewer-frame {
     flex: 1 1 auto;
     min-height: calc(100svh - 96px);
@@ -688,7 +578,7 @@ h1 {
     right: 10px;
     bottom: 10px;
     display: grid;
-    grid-template-columns: repeat(2, minmax(0, 1fr));
+    grid-template-columns: repeat(3, minmax(0, 1fr));
     align-items: stretch;
     width: auto;
     padding: 8px 10px;
@@ -700,11 +590,16 @@ h1 {
 
   .overlay-date {
     width: 100%;
-    flex: 1 1 50%;
+    flex: 1 1 33.333%;
+  }
+
+  .overlay-latitude {
+    width: 100%;
+    flex: 1 1 33.333%;
   }
 
   .overlay-time {
     width: 100%;
-    flex: 1 1 50%;
+    flex: 1 1 33.333%;
   }
 }

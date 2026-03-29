@@ -42,7 +42,7 @@
         </div>
 
         <details class="mobile-controls-shell" id="mobile-controls-shell">
-          <summary class="mobile-controls-toggle">Controls</summary>
+          <summary class="mobile-controls-toggle">Settings</summary>
           <div class="projection-controls" id="projection-controls">
           <label class="projection-select-wrap" for="labels-visibility">
             <span class="toolbar-label">Text and labels</span>
@@ -66,13 +66,6 @@
               <option value="popular">Popular targets</option>
               <option value="full">Full catalog</option>
             </select>
-          </label>
-
-          <label class="projection-select-wrap" for="latitude-picker-button">
-            <span class="toolbar-label">Observer latitude</span>
-            <button id="latitude-picker-button" type="button" class="control-button" aria-expanded="false">
-              Adjust latitude
-            </button>
           </label>
 
           <label class="projection-select-wrap slider-wrap" for="field-brightness">
@@ -111,33 +104,6 @@
 
         <div class="viewer-frame">
           <canvas id="star-map" aria-label="Interactive map of stars and constellations"></canvas>
-          <aside class="latitude-panel" id="latitude-panel" aria-label="Observer latitude picker" hidden>
-            <div class="latitude-panel-card">
-              <p class="overlay-kicker">Observer latitude</p>
-              <p class="latitude-value" id="latitude-value">42.0° N</p>
-              <div class="latitude-picker">
-                <input
-                  id="latitude-slider"
-                  class="latitude-slider"
-                  type="range"
-                  min="25"
-                  max="49"
-                  step="0.1"
-                  value="42"
-                  aria-label="Adjust observer latitude"
-                />
-                <div class="us-map" id="us-map" aria-hidden="true">
-                  <svg viewBox="0 0 240 140" class="us-map-svg">
-                    <path
-                      class="us-map-outline"
-                      d="M16 82 L23 63 L40 57 L58 52 L81 48 L104 41 L132 37 L158 36 L180 40 L201 46 L219 55 L225 64 L213 76 L198 82 L191 95 L172 101 L147 105 L122 110 L98 109 L81 104 L59 98 L42 95 L29 90 Z"
-                    />
-                    <line class="us-map-latitude" id="us-map-latitude" x1="20" x2="220" y1="44" y2="44" />
-                  </svg>
-                </div>
-              </div>
-            </div>
-          </aside>
           <div class="viewer-overlay">
             <div class="overlay-card" id="object-card">
               <p class="overlay-kicker">Hover a star</p>
@@ -146,6 +112,20 @@
               <p id="object-coords">RA 2.53h • Dec +89.3°</p>
             </div>
             <div class="overlay-dock" aria-label="Date and time controls">
+              <label class="overlay-control overlay-latitude" for="observer-latitude-wheel">
+                <span class="overlay-control-label">Latitude</span>
+                <div
+                  id="observer-latitude-wheel"
+                  class="time-wheel"
+                  role="spinbutton"
+                  tabindex="0"
+                  aria-label="Adjust observer latitude"
+                  aria-valuemin="-90"
+                  aria-valuemax="90"
+                >
+                  <span id="observer-latitude-value">42.0° N</span>
+                </div>
+              </label>
               <label class="overlay-control overlay-date" for="season-day">
                 <span class="overlay-control-label">Date</span>
                 <div

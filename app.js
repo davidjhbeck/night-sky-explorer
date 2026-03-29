@@ -487,15 +487,13 @@ const projectionDescription = document.getElementById("projection-description");
 const labelsVisibilitySelect = document.getElementById("labels-visibility");
 const asterismVisibilitySelect = document.getElementById("asterism-visibility");
 const deepSkyVisibilitySelect = document.getElementById("deep-sky-visibility");
-const latitudePickerButton = document.getElementById("latitude-picker-button");
-const latitudePanel = document.getElementById("latitude-panel");
-const latitudeSlider = document.getElementById("latitude-slider");
-const latitudeValue = document.getElementById("latitude-value");
-const usMapLatitude = document.getElementById("us-map-latitude");
+const mobileControlsShell = document.getElementById("mobile-controls-shell");
 const timeOfDayWheel = document.getElementById("time-of-day");
 const timeOfDayValue = document.getElementById("time-of-day-value");
 const seasonDayWheel = document.getElementById("season-day");
 const seasonDayValue = document.getElementById("season-day-value");
+const observerLatitudeWheel = document.getElementById("observer-latitude-wheel");
+const observerLatitudeValue = document.getElementById("observer-latitude-value");
 const fieldBrightnessInput = document.getElementById("field-brightness");
 const fieldBrightnessValue = document.getElementById("field-brightness-value");
 const foregroundSizeInput = document.getElementById("foreground-size");
@@ -545,7 +543,6 @@ const state = {
   deepSkyVisibility: "popular",
   coordinateSystem: "horizontal",
   observerLatitude: 42,
-  latitudePanelOpen: false,
   timeOfDayHours: 22,
   seasonDay: getDayOfYear(currentDate),
   fieldStarBrightness: 1.6,
@@ -572,6 +569,11 @@ const seasonWheelGesture = {
   active: false,
   startY: 0,
   accumulatedDays: 0
+};
+const latitudeWheelGesture = {
+  active: false,
+  startY: 0,
+  accumulatedDegrees: 0
 };
 
 function deltaToPixels(delta, deltaMode, viewportSize) {
@@ -1305,18 +1307,10 @@ function updateSeasonWheel() {
 
 function updateLatitudeUI() {
   const northSouth = state.observerLatitude >= 0 ? "N" : "S";
-  latitudeValue.textContent = `${Math.abs(state.observerLatitude).toFixed(1)}° ${northSouth}`;
-  latitudeSlider.value = state.observerLatitude.toFixed(1);
-  latitudePickerButton.textContent = `Latitude ${state.observerLatitude.toFixed(1)}°`;
-  latitudePickerButton.setAttribute("aria-expanded", state.latitudePanelOpen ? "true" : "false");
-  latitudePanel.hidden = !state.latitudePanelOpen;
-
-  const minLatitude = Number(latitudeSlider.min);
-  const maxLatitude = Number(latitudeSlider.max);
-  const ratio = 1 - (state.observerLatitude - minLatitude) / (maxLatitude - minLatitude);
-  const y = 18 + ratio * 96;
-  usMapLatitude.setAttribute("y1", y.toFixed(1));
-  usMapLatitude.setAttribute("y2", y.toFixed(1));
+  const formatted = `${Math.abs(state.observerLatitude).toFixed(1)}° ${northSouth}`;
+  observerLatitudeValue.textContent = formatted;
+  observerLatitudeWheel.setAttribute("aria-valuenow", state.observerLatitude.toFixed(1));
+  observerLatitudeWheel.setAttribute("aria-valuetext", formatted);
 }
 
 function setSeasonDay(day) {
@@ -1328,6 +1322,17 @@ function setSeasonDay(day) {
 
 function nudgeSeasonDay(deltaDays) {
   setSeasonDay(state.seasonDay + deltaDays);
+}
+
+function setObserverLatitude(latitude) {
+  state.observerLatitude = clamp(latitude, -90, 90);
+  updateLatitudeUI();
+  updateInfoCard(state.hoverStar);
+  draw();
+}
+
+function nudgeObserverLatitude(deltaDegrees) {
+  setObserverLatitude(state.observerLatitude + deltaDegrees);
 }
 
 function draw() {
@@ -1520,18 +1525,6 @@ deepSkyVisibilitySelect.addEventListener("change", (event) => {
   draw();
 });
 
-latitudeSlider.addEventListener("input", (event) => {
-  state.observerLatitude = clamp(Number(event.target.value) || 0, -90, 90);
-  updateLatitudeUI();
-  updateInfoCard(state.hoverStar);
-  draw();
-});
-
-latitudePickerButton.addEventListener("click", () => {
-  state.latitudePanelOpen = !state.latitudePanelOpen;
-  updateLatitudeUI();
-});
-
 fieldBrightnessInput.addEventListener("input", (event) => {
   state.fieldStarBrightness = Number(event.target.value) / 100;
   fieldBrightnessValue.textContent = `${event.target.value}%`;
@@ -1660,6 +1653,64 @@ seasonDayWheel.addEventListener("keydown", (event) => {
   }
 });
 
+observerLatitudeWheel.addEventListener("wheel", (event) => {
+  event.preventDefault();
+  const delta = Math.abs(event.deltaY) < 2 ? -event.deltaY : -Math.sign(event.deltaY);
+  nudgeObserverLatitude(delta);
+}, { passive: false });
+
+observerLatitudeWheel.addEventListener("pointerdown", (event) => {
+  event.preventDefault();
+  latitudeWheelGesture.active = true;
+  latitudeWheelGesture.startY = event.clientY;
+  latitudeWheelGesture.accumulatedDegrees = 0;
+  observerLatitudeWheel.classList.add("dragging");
+  observerLatitudeWheel.setPointerCapture(event.pointerId);
+});
+
+observerLatitudeWheel.addEventListener("pointermove", (event) => {
+  if (!latitudeWheelGesture.active) {
+    return;
+  }
+
+  const deltaY = latitudeWheelGesture.startY - event.clientY;
+  const totalDegrees = deltaY / 10;
+  const stepDegrees = totalDegrees - latitudeWheelGesture.accumulatedDegrees;
+
+  if (Math.abs(stepDegrees) >= 0.12) {
+    latitudeWheelGesture.accumulatedDegrees = totalDegrees;
+    nudgeObserverLatitude(stepDegrees);
+  }
+});
+
+function releaseLatitudeWheel(pointerId) {
+  latitudeWheelGesture.active = false;
+  latitudeWheelGesture.startY = 0;
+  latitudeWheelGesture.accumulatedDegrees = 0;
+  observerLatitudeWheel.classList.remove("dragging");
+  if (pointerId !== undefined && observerLatitudeWheel.hasPointerCapture(pointerId)) {
+    observerLatitudeWheel.releasePointerCapture(pointerId);
+  }
+}
+
+observerLatitudeWheel.addEventListener("pointerup", (event) => {
+  releaseLatitudeWheel(event.pointerId);
+});
+
+observerLatitudeWheel.addEventListener("pointercancel", (event) => {
+  releaseLatitudeWheel(event.pointerId);
+});
+
+observerLatitudeWheel.addEventListener("keydown", (event) => {
+  if (event.key === "ArrowUp" || event.key === "ArrowRight") {
+    event.preventDefault();
+    nudgeObserverLatitude(0.5);
+  } else if (event.key === "ArrowDown" || event.key === "ArrowLeft") {
+    event.preventDefault();
+    nudgeObserverLatitude(-0.5);
+  }
+});
+
 window.addEventListener("resize", resizeCanvas);
 
 updateInfoCard(state.hoverStar);
@@ -1667,8 +1718,8 @@ projectionDescription.textContent = projectionMetadata[state.projection].label;
 labelsVisibilitySelect.value = state.labelsVisibility;
 asterismVisibilitySelect.value = state.asterismVisibility;
 deepSkyVisibilitySelect.value = state.deepSkyVisibility;
-updateLatitudeUI();
 updateSeasonWheel();
+updateLatitudeUI();
 updateTimeWheel();
 fieldBrightnessValue.textContent = `${fieldBrightnessInput.value}%`;
 foregroundSizeValue.textContent = `${foregroundSizeInput.value}%`;
