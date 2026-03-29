@@ -3,6 +3,7 @@ const stars = [
   { id: "yildun", name: "Yildun", constellation: "Ursa Minor", ra: 17.54, dec: 86.58, mag: 4.35 },
   { id: "epsilon-umi", name: "Epsilon Ursae Minoris", constellation: "Ursa Minor", ra: 16.77, dec: 82.04, mag: 4.23 },
   { id: "zeta-umi", name: "Zeta Ursae Minoris", constellation: "Ursa Minor", ra: 15.73, dec: 77.79, mag: 4.32 },
+  { id: "eta-umi", name: "Eta Ursae Minoris", constellation: "Ursa Minor", ra: 16.29, dec: 75.76, mag: 4.95 },
   { id: "kochab", name: "Kochab", constellation: "Ursa Minor", ra: 14.85, dec: 74.16, mag: 2.08 },
   { id: "pherkad", name: "Pherkad", constellation: "Ursa Minor", ra: 15.35, dec: 71.83, mag: 3.0 },
   { id: "dubhe", name: "Dubhe", constellation: "Ursa Major", ra: 11.06, dec: 61.75, mag: 1.79 },
@@ -85,6 +86,8 @@ const stars = [
   { id: "kaus-borealis", name: "Kaus Borealis", constellation: "Sagittarius", ra: 18.47, dec: -25.42, mag: 2.82 },
   { id: "ascella", name: "Ascella", constellation: "Sagittarius", ra: 19.04, dec: -29.88, mag: 2.6 },
   { id: "phi-sgr", name: "Phi Sagittarii", constellation: "Sagittarius", ra: 18.76, dec: -26.99, mag: 3.17 },
+  { id: "tau-sgr", name: "Tau Sagittarii", constellation: "Sagittarius", ra: 19.12, dec: -27.67, mag: 3.32 },
+  { id: "psi-sgr", name: "Psi Sagittarii", constellation: "Sagittarius", ra: 19.26, dec: -25.42, mag: 4.85 },
   { id: "alnasl", name: "Alnasl", constellation: "Sagittarius", ra: 18.1, dec: -30.42, mag: 2.98 },
   { id: "deneb-kaitos", name: "Deneb Kaitos", constellation: "Cetus", ra: 0.73, dec: -17.99, mag: 2.04 },
   { id: "achernar", name: "Achernar", constellation: "Eridanus", ra: 1.63, dec: -57.24, mag: 0.46 }
@@ -264,6 +267,9 @@ const constellations = [
       ["kaus-borealis", "phi-sgr"],
       ["phi-sgr", "nunki"],
       ["phi-sgr", "ascella"],
+      ["nunki", "tau-sgr"],
+      ["tau-sgr", "psi-sgr"],
+      ["psi-sgr", "kaus-borealis"],
       ["kaus-media", "alnasl"],
       ["alnasl", "kaus-australis"],
       ["kaus-borealis", "kaus-media"]
@@ -360,6 +366,8 @@ const asterisms = [
       ["polaris", "yildun"],
       ["yildun", "epsilon-umi"],
       ["epsilon-umi", "zeta-umi"],
+      ["zeta-umi", "eta-umi"],
+      ["eta-umi", "kochab"],
       ["zeta-umi", "kochab"],
       ["zeta-umi", "pherkad"]
     ]
@@ -427,6 +435,9 @@ const asterisms = [
       ["kaus-borealis", "phi-sgr"],
       ["phi-sgr", "nunki"],
       ["phi-sgr", "ascella"],
+      ["nunki", "tau-sgr"],
+      ["tau-sgr", "psi-sgr"],
+      ["psi-sgr", "kaus-borealis"],
       ["kaus-media", "alnasl"],
       ["alnasl", "kaus-australis"],
       ["kaus-borealis", "alnasl"],
@@ -556,7 +567,7 @@ const projectionMetadata = {
   }
 };
 
-const fieldStars = generateFieldStars(560);
+const fieldStars = generateFieldStars(1120);
 const allStars = [...fieldStars, ...stars];
 const MAX_ZOOM = 12;
 const currentDate = new Date();
@@ -566,6 +577,8 @@ milkyWayImage.crossOrigin = "anonymous";
 milkyWayImage.src = "https://upload.wikimedia.org/wikipedia/commons/6/60/ESO_-_Milky_Way.jpg";
 const milkyWaySamples = [];
 let milkyWayReady = false;
+const milkyWayBuffer = document.createElement("canvas");
+const milkyWayBufferCtx = milkyWayBuffer.getContext("2d");
 
 const state = {
   centerRa: 6,
@@ -604,17 +617,17 @@ const pointerGesture = {
 };
 const timeWheelGesture = {
   active: false,
-  startY: 0,
+  startX: 0,
   accumulatedHours: 0
 };
 const seasonWheelGesture = {
   active: false,
-  startY: 0,
+  startX: 0,
   accumulatedDays: 0
 };
 const latitudeWheelGesture = {
   active: false,
-  startY: 0,
+  startX: 0,
   accumulatedDegrees: 0
 };
 
@@ -666,6 +679,10 @@ function wrapDayOfYear(day) {
 
 function wrapDegrees(degrees) {
   return ((degrees % 360) + 360) % 360;
+}
+
+function normalizeRightAscensionDegrees(degrees) {
+  return wrapDegrees(degrees);
 }
 
 function angularDifferenceDegrees(degrees, centerDegrees) {
@@ -870,6 +887,35 @@ function generateFieldStars(count) {
   return generated;
 }
 
+function galacticToEquatorial(longitude, latitude) {
+  const lon = (longitude * Math.PI) / 180;
+  const lat = (latitude * Math.PI) / 180;
+  const cosLat = Math.cos(lat);
+  const galacticVector = [
+    cosLat * Math.cos(lon),
+    cosLat * Math.sin(lon),
+    Math.sin(lat)
+  ];
+  const x =
+    -0.0548755604 * galacticVector[0] +
+    0.4941094279 * galacticVector[1] +
+    -0.867666149 * galacticVector[2];
+  const y =
+    -0.8734370902 * galacticVector[0] +
+    -0.44482963 * galacticVector[1] +
+    -0.1980763734 * galacticVector[2];
+  const z =
+    -0.4838350155 * galacticVector[0] +
+    0.7469822445 * galacticVector[1] +
+    0.4559837762 * galacticVector[2];
+  const rightAscension = normalizeRightAscensionDegrees((Math.atan2(y, x) * 180) / Math.PI);
+  const declination = (Math.asin(clamp(z, -1, 1)) * 180) / Math.PI;
+  return {
+    ra: rightAscension / 15,
+    dec: declination
+  };
+}
+
 function panByPixels(dx, dy) {
   const projection = projectionMetadata[state.projection];
   const center = getViewCenter();
@@ -920,8 +966,8 @@ function resetTouchGesture(points) {
 
 milkyWayImage.addEventListener("load", () => {
   const sampleCanvas = document.createElement("canvas");
-  const sampleWidth = 420;
-  const sampleHeight = 210;
+  const sampleWidth = 540;
+  const sampleHeight = 270;
   sampleCanvas.width = sampleWidth;
   sampleCanvas.height = sampleHeight;
   const sampleCtx = sampleCanvas.getContext("2d", { willReadFrequently: true });
@@ -937,14 +983,18 @@ milkyWayImage.addEventListener("load", () => {
       const green = data[offset + 1];
       const blue = data[offset + 2];
       const luminance = red * 0.2126 + green * 0.7152 + blue * 0.0722;
-      const alpha = clamp((luminance - 18) / 110, 0, 1);
-      if (alpha < 0.12) {
+      const alpha = clamp((luminance - 14) / 120, 0, 1);
+      if (alpha < 0.09) {
         continue;
       }
 
+      const galacticLongitude = (x / sampleWidth) * 360;
+      const galacticLatitude = 90 - (y / sampleHeight) * 180;
+      const equatorial = galacticToEquatorial(galacticLongitude, galacticLatitude);
+
       milkyWaySamples.push({
-        lon: (x / sampleWidth) * 360,
-        lat: 90 - (y / sampleHeight) * 180,
+        ra: equatorial.ra,
+        dec: equatorial.dec,
         red,
         green,
         blue,
@@ -1120,30 +1170,49 @@ function drawMilkyWayImage() {
     return;
   }
 
-  ctx.save();
+  const width = canvas.clientWidth;
+  const height = canvas.clientHeight;
+  const bufferScale = 0.34;
+  const bufferWidth = Math.max(220, Math.round(width * bufferScale));
+  const bufferHeight = Math.max(220, Math.round(height * bufferScale));
+
+  if (milkyWayBuffer.width !== bufferWidth || milkyWayBuffer.height !== bufferHeight) {
+    milkyWayBuffer.width = bufferWidth;
+    milkyWayBuffer.height = bufferHeight;
+  }
+
+  milkyWayBufferCtx.clearRect(0, 0, bufferWidth, bufferHeight);
+  milkyWayBufferCtx.globalCompositeOperation = "source-over";
 
   for (const sample of milkyWaySamples) {
-    const point = lonLatToScreen(sample.lon, sample.lat);
+    const point = raDecToScreen(sample.ra, sample.dec);
     if (!point) {
       continue;
     }
     if (
-      point.x < -20 ||
-      point.x > canvas.clientWidth + 20 ||
-      point.y < -20 ||
-      point.y > canvas.clientHeight + 20
+      point.x < -90 ||
+      point.x > width + 90 ||
+      point.y < -90 ||
+      point.y > height + 90
     ) {
       continue;
     }
 
-    const opacity = sample.alpha * state.milkyWayBrightness * 0.32;
-    const radius = Math.max(1.2, 2.4 * Math.sqrt(state.zoom));
-    ctx.fillStyle = `rgba(${sample.red}, ${sample.green}, ${sample.blue}, ${opacity.toFixed(3)})`;
-    ctx.beginPath();
-    ctx.ellipse(point.x, point.y, radius * 2.5, radius, 0, 0, Math.PI * 2);
-    ctx.fill();
+    const scaledX = point.x * bufferScale;
+    const scaledY = point.y * bufferScale;
+    const opacity = sample.alpha * state.milkyWayBrightness * 0.34;
+    const radius = Math.max(1.6, (2.2 + state.zoom * 0.2) * bufferScale);
+    milkyWayBufferCtx.fillStyle = `rgba(${sample.red}, ${sample.green}, ${sample.blue}, ${opacity.toFixed(3)})`;
+    milkyWayBufferCtx.beginPath();
+    milkyWayBufferCtx.ellipse(scaledX, scaledY, radius * 5.6, radius * 2.6, 0, 0, Math.PI * 2);
+    milkyWayBufferCtx.fill();
   }
 
+  ctx.save();
+  ctx.globalAlpha = 0.92;
+  ctx.filter = "blur(18px) saturate(0.92)";
+  ctx.drawImage(milkyWayBuffer, 0, 0, width, height);
+  ctx.filter = "none";
   ctx.restore();
 }
 
@@ -1674,7 +1743,7 @@ timeOfDayWheel.addEventListener("wheel", (event) => {
 timeOfDayWheel.addEventListener("pointerdown", (event) => {
   event.preventDefault();
   timeWheelGesture.active = true;
-  timeWheelGesture.startY = event.clientY;
+  timeWheelGesture.startX = event.clientX;
   timeWheelGesture.accumulatedHours = 0;
   timeOfDayWheel.classList.add("dragging");
   timeOfDayWheel.setPointerCapture(event.pointerId);
@@ -1685,8 +1754,8 @@ timeOfDayWheel.addEventListener("pointermove", (event) => {
     return;
   }
 
-  const deltaY = timeWheelGesture.startY - event.clientY;
-  const totalHours = deltaY / 26;
+  const deltaX = event.clientX - timeWheelGesture.startX;
+  const totalHours = deltaX / 34;
   const stepHours = totalHours - timeWheelGesture.accumulatedHours;
 
   if (Math.abs(stepHours) >= 0.08) {
@@ -1697,7 +1766,7 @@ timeOfDayWheel.addEventListener("pointermove", (event) => {
 
 function releaseTimeWheel(pointerId) {
   timeWheelGesture.active = false;
-  timeWheelGesture.startY = 0;
+  timeWheelGesture.startX = 0;
   timeWheelGesture.accumulatedHours = 0;
   timeOfDayWheel.classList.remove("dragging");
   if (pointerId !== undefined && timeOfDayWheel.hasPointerCapture(pointerId)) {
@@ -1732,7 +1801,7 @@ seasonDayWheel.addEventListener("wheel", (event) => {
 seasonDayWheel.addEventListener("pointerdown", (event) => {
   event.preventDefault();
   seasonWheelGesture.active = true;
-  seasonWheelGesture.startY = event.clientY;
+  seasonWheelGesture.startX = event.clientX;
   seasonWheelGesture.accumulatedDays = 0;
   seasonDayWheel.classList.add("dragging");
   seasonDayWheel.setPointerCapture(event.pointerId);
@@ -1743,8 +1812,8 @@ seasonDayWheel.addEventListener("pointermove", (event) => {
     return;
   }
 
-  const deltaY = seasonWheelGesture.startY - event.clientY;
-  const totalDays = deltaY / 8;
+  const deltaX = event.clientX - seasonWheelGesture.startX;
+  const totalDays = deltaX / 18;
   const stepDays = totalDays - seasonWheelGesture.accumulatedDays;
 
   if (Math.abs(stepDays) >= 0.18) {
@@ -1755,7 +1824,7 @@ seasonDayWheel.addEventListener("pointermove", (event) => {
 
 function releaseSeasonWheel(pointerId) {
   seasonWheelGesture.active = false;
-  seasonWheelGesture.startY = 0;
+  seasonWheelGesture.startX = 0;
   seasonWheelGesture.accumulatedDays = 0;
   seasonDayWheel.classList.remove("dragging");
   if (pointerId !== undefined && seasonDayWheel.hasPointerCapture(pointerId)) {
@@ -1790,7 +1859,7 @@ observerLatitudeWheel.addEventListener("wheel", (event) => {
 observerLatitudeWheel.addEventListener("pointerdown", (event) => {
   event.preventDefault();
   latitudeWheelGesture.active = true;
-  latitudeWheelGesture.startY = event.clientY;
+  latitudeWheelGesture.startX = event.clientX;
   latitudeWheelGesture.accumulatedDegrees = 0;
   observerLatitudeWheel.classList.add("dragging");
   observerLatitudeWheel.setPointerCapture(event.pointerId);
@@ -1801,8 +1870,8 @@ observerLatitudeWheel.addEventListener("pointermove", (event) => {
     return;
   }
 
-  const deltaY = latitudeWheelGesture.startY - event.clientY;
-  const totalDegrees = deltaY / 10;
+  const deltaX = event.clientX - latitudeWheelGesture.startX;
+  const totalDegrees = deltaX / 16;
   const stepDegrees = totalDegrees - latitudeWheelGesture.accumulatedDegrees;
 
   if (Math.abs(stepDegrees) >= 0.12) {
@@ -1813,7 +1882,7 @@ observerLatitudeWheel.addEventListener("pointermove", (event) => {
 
 function releaseLatitudeWheel(pointerId) {
   latitudeWheelGesture.active = false;
-  latitudeWheelGesture.startY = 0;
+  latitudeWheelGesture.startX = 0;
   latitudeWheelGesture.accumulatedDegrees = 0;
   observerLatitudeWheel.classList.remove("dragging");
   if (pointerId !== undefined && observerLatitudeWheel.hasPointerCapture(pointerId)) {
