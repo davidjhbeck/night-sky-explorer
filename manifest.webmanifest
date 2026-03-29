@@ -1,0 +1,10 @@
+{
+  "name": "Night Sky Explorer",
+  "short_name": "Night Sky",
+  "start_url": ".",
+  "display": "standalone",
+  "background_color": "#02050d",
+  "theme_color": "#08111f",
+  "description": "Explore a static interactive map of stars, constellations, asterisms, and deep-sky objects.",
+  "icons": []
+}

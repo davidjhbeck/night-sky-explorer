@@ -1,0 +1,164 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta name="theme-color" content="#08111f" />
+    <meta name="apple-mobile-web-app-capable" content="yes" />
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
+    <meta name="apple-mobile-web-app-title" content="Night Sky Explorer" />
+    <title>Night Sky Explorer</title>
+    <link rel="manifest" href="./manifest.webmanifest" />
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;700&family=Space+Mono:wght@400;700&display=swap"
+      rel="stylesheet"
+    />
+    <link rel="stylesheet" href="./styles.css" />
+  </head>
+  <body>
+    <main class="app-shell">
+      <section class="hero">
+        <p class="eyebrow">Static celestial coordinates</p>
+        <h1>Night Sky Explorer</h1>
+        <p class="hero-copy">
+          Explore a simplified projection of bright stars and major
+          constellations. The map uses fixed right ascension and declination, so
+          the sky stays constant all year long.
+        </p>
+      </section>
+
+      <section class="viewer-panel">
+        <div class="viewer-toolbar">
+          <div>
+            <p class="toolbar-label">Navigation</p>
+            <p class="toolbar-value">Drag to pan, two-finger pan, pinch or scroll to zoom</p>
+          </div>
+          <div>
+            <p class="toolbar-label">Projection</p>
+            <p class="toolbar-value" id="projection-description">Equirectangular star chart</p>
+          </div>
+        </div>
+
+        <div class="projection-controls">
+          <label class="projection-select-wrap" for="coordinate-system">
+            <span class="toolbar-label">Coordinate system</span>
+            <select id="coordinate-system" aria-label="Choose the coordinate system">
+              <option value="equatorial">Equatorial (RA/Dec)</option>
+              <option value="horizontal">Local horizon</option>
+            </select>
+          </label>
+
+          <label class="projection-select-wrap" for="projection-select">
+            <span class="toolbar-label">Map projection</span>
+            <select id="projection-select" aria-label="Choose the sky projection">
+              <option value="equirectangular">Equirectangular</option>
+              <option value="orthographic">Orthographic</option>
+              <option value="stereographic">Stereographic</option>
+            </select>
+          </label>
+
+          <label class="projection-select-wrap" for="constellation-detail">
+            <span class="toolbar-label">Constellation lines</span>
+            <select id="constellation-detail" aria-label="Choose constellation line detail">
+              <option value="major">Major lines</option>
+              <option value="full">More complete lines</option>
+            </select>
+          </label>
+
+          <label class="projection-select-wrap" for="asterism-visibility">
+            <span class="toolbar-label">Asterisms</span>
+            <select id="asterism-visibility" aria-label="Choose asterism visibility">
+              <option value="off">Off</option>
+              <option value="on">Show famous asterisms</option>
+            </select>
+          </label>
+
+          <label class="projection-select-wrap" for="deep-sky-visibility">
+            <span class="toolbar-label">Deep-sky objects</span>
+            <select id="deep-sky-visibility" aria-label="Choose deep-sky object visibility">
+              <option value="popular">Popular targets</option>
+              <option value="full">Full catalog</option>
+            </select>
+          </label>
+
+          <label class="projection-select-wrap" for="observer-latitude">
+            <span class="toolbar-label">Observer latitude</span>
+            <input
+              id="observer-latitude"
+              type="number"
+              min="-90"
+              max="90"
+              step="0.1"
+              value="40.0"
+              aria-label="Observer latitude in degrees"
+            />
+          </label>
+
+          <label class="projection-select-wrap slider-wrap" for="sky-rotation">
+            <span class="toolbar-label">Time / seasonal rotation</span>
+            <div class="slider-row">
+              <input
+                id="sky-rotation"
+                type="range"
+                min="-12"
+                max="12"
+                value="0"
+                step="0.1"
+                aria-label="Adjust sky rotation around the polar axis"
+              />
+              <span class="slider-value" id="sky-rotation-value">+0.0h</span>
+            </div>
+          </label>
+
+          <label class="projection-select-wrap slider-wrap" for="field-brightness">
+            <span class="toolbar-label">Background star brightness</span>
+            <div class="slider-row">
+              <input
+                id="field-brightness"
+                type="range"
+                min="90"
+                max="230"
+                value="160"
+                step="1"
+                aria-label="Adjust background star brightness"
+              />
+              <span class="slider-value" id="field-brightness-value">160%</span>
+            </div>
+          </label>
+
+          <label class="projection-select-wrap slider-wrap" for="foreground-size">
+            <span class="toolbar-label">Foreground star size</span>
+            <div class="slider-row">
+              <input
+                id="foreground-size"
+                type="range"
+                min="35"
+                max="105"
+                value="70"
+                step="1"
+                aria-label="Adjust labeled star size"
+              />
+              <span class="slider-value" id="foreground-size-value">70%</span>
+            </div>
+          </label>
+        </div>
+
+        <div class="viewer-frame">
+          <canvas id="star-map" aria-label="Interactive map of stars and constellations"></canvas>
+          <div class="viewer-overlay">
+            <div class="overlay-card" id="object-card">
+              <p class="overlay-kicker">Hover a star</p>
+              <h2 id="object-name">Polaris</h2>
+              <p id="object-meta">Ursa Minor • mag 1.98</p>
+              <p id="object-coords">RA 2.53h • Dec +89.3°</p>
+            </div>
+          </div>
+        </div>
+      </section>
+    </main>
+
+    <script src="./app.js"></script>
+  </body>
+</html>

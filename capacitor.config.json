@@ -1,0 +1,8 @@
+{
+  "appId": "com.codex.nightskyexplorer",
+  "appName": "Night Sky Explorer",
+  "webDir": ".",
+  "server": {
+    "iosScheme": "https"
+  }
+}
