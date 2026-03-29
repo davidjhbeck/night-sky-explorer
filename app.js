@@ -492,8 +492,7 @@ const coordinateSystemSelect = document.getElementById("coordinate-system");
 const observerLatitudeInput = document.getElementById("observer-latitude");
 const timeOfDayInput = document.getElementById("time-of-day");
 const timeOfDayValue = document.getElementById("time-of-day-value");
-const seasonDayInput = document.getElementById("season-day");
-const seasonDayValue = document.getElementById("season-day-value");
+const seasonDaySelect = document.getElementById("season-day");
 const fieldBrightnessInput = document.getElementById("field-brightness");
 const fieldBrightnessValue = document.getElementById("field-brightness-value");
 const foregroundSizeInput = document.getElementById("foreground-size");
@@ -586,6 +585,10 @@ function getDayOfYear(date) {
   const start = new Date(date.getFullYear(), 0, 0);
   const diff = date - start;
   return Math.floor(diff / 86400000);
+}
+
+function dayOfYearToDate(day, year = currentSeasonYear) {
+  return new Date(year, 0, day);
 }
 
 function clamp(value, min, max) {
@@ -1142,8 +1145,22 @@ function formatTimeOfDay(hours) {
 }
 
 function formatSeasonDay(day) {
-  const date = new Date(currentSeasonYear, 0, clamp(Math.round(day), 1, getDaysInYear(currentSeasonYear)));
+  const date = dayOfYearToDate(clamp(Math.round(day), 1, getDaysInYear(currentSeasonYear)));
   return date.toLocaleDateString(undefined, { month: "short", day: "numeric" });
+}
+
+function populateSeasonOptions() {
+  const daysInYear = getDaysInYear(currentSeasonYear);
+
+  for (let day = 1; day <= daysInYear; day += 1) {
+    const option = document.createElement("option");
+    option.value = String(day);
+    option.textContent = dayOfYearToDate(day).toLocaleDateString(undefined, {
+      month: "short",
+      day: "numeric"
+    });
+    seasonDaySelect.append(option);
+  }
 }
 
 function draw() {
@@ -1330,9 +1347,8 @@ timeOfDayInput.addEventListener("input", (event) => {
   draw();
 });
 
-seasonDayInput.addEventListener("input", (event) => {
+seasonDaySelect.addEventListener("change", (event) => {
   state.seasonDay = clamp(Number(event.target.value) || 1, 1, getDaysInYear(currentSeasonYear));
-  seasonDayValue.textContent = formatSeasonDay(state.seasonDay);
   updateInfoCard(state.hoverStar);
   draw();
 });
@@ -1351,6 +1367,7 @@ foregroundSizeInput.addEventListener("input", (event) => {
 
 window.addEventListener("resize", resizeCanvas);
 
+populateSeasonOptions();
 updateInfoCard(state.hoverStar);
 projectionDescription.textContent = projectionMetadata[state.projection].label;
 projectionSelect.value = state.projection;
@@ -1359,11 +1376,9 @@ asterismVisibilitySelect.value = state.asterismVisibility;
 deepSkyVisibilitySelect.value = state.deepSkyVisibility;
 coordinateSystemSelect.value = state.coordinateSystem;
 observerLatitudeInput.value = state.observerLatitude.toFixed(1);
-seasonDayInput.max = String(getDaysInYear(currentSeasonYear));
-seasonDayInput.value = String(state.seasonDay);
+seasonDaySelect.value = String(state.seasonDay);
 timeOfDayInput.value = String(state.timeOfDayHours);
 timeOfDayValue.textContent = formatTimeOfDay(state.timeOfDayHours);
-seasonDayValue.textContent = formatSeasonDay(state.seasonDay);
 fieldBrightnessValue.textContent = `${fieldBrightnessInput.value}%`;
 foregroundSizeValue.textContent = `${foregroundSizeInput.value}%`;
 resizeCanvas();
