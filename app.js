@@ -575,10 +575,12 @@ const currentSeasonYear = currentDate.getFullYear();
 const milkyWayImage = new Image();
 milkyWayImage.crossOrigin = "anonymous";
 milkyWayImage.src = "https://upload.wikimedia.org/wikipedia/commons/6/60/ESO_-_Milky_Way.jpg";
-const milkyWaySamples = [];
 let milkyWayReady = false;
 const milkyWayBuffer = document.createElement("canvas");
 const milkyWayBufferCtx = milkyWayBuffer.getContext("2d");
+let milkyWaySourceData = null;
+let milkyWaySourceWidth = 0;
+let milkyWaySourceHeight = 0;
 
 const state = {
   centerRa: 6,
@@ -916,6 +918,134 @@ function galacticToEquatorial(longitude, latitude) {
   };
 }
 
+function equatorialToGalactic(ra, dec) {
+  const rightAscension = (ra * 15 * Math.PI) / 180;
+  const declination = (dec * Math.PI) / 180;
+  const cosDec = Math.cos(declination);
+  const equatorialVector = [
+    cosDec * Math.cos(rightAscension),
+    cosDec * Math.sin(rightAscension),
+    Math.sin(declination)
+  ];
+  const x =
+    -0.0548755604 * equatorialVector[0] +
+    -0.8734370902 * equatorialVector[1] +
+    -0.4838350155 * equatorialVector[2];
+  const y =
+    0.4941094279 * equatorialVector[0] +
+    -0.44482963 * equatorialVector[1] +
+    0.7469822445 * equatorialVector[2];
+  const z =
+    -0.867666149 * equatorialVector[0] +
+    -0.1980763734 * equatorialVector[1] +
+    0.4559837762 * equatorialVector[2];
+
+  return {
+    lon: normalizeRightAscensionDegrees((Math.atan2(y, x) * 180) / Math.PI),
+    lat: (Math.asin(clamp(z, -1, 1)) * 180) / Math.PI
+  };
+}
+
+function horizontalToEquatorial(lon, lat) {
+  const azimuth = (wrapDegrees(360 - lon) * Math.PI) / 180;
+  const altitude = (lat * Math.PI) / 180;
+  const latitude = (state.observerLatitude * Math.PI) / 180;
+  const sinAltitude = Math.sin(altitude);
+  const cosAltitude = Math.cos(altitude);
+  const sinLatitude = Math.sin(latitude);
+  const cosLatitude = Math.cos(latitude);
+  const sinAzimuth = Math.sin(azimuth);
+  const cosAzimuth = Math.cos(azimuth);
+
+  const sinDeclination = sinAltitude * sinLatitude + cosAltitude * cosLatitude * cosAzimuth;
+  const declination = Math.asin(clamp(sinDeclination, -1, 1));
+  const hourAngle = Math.atan2(
+    -sinAzimuth * cosAltitude,
+    sinAltitude * cosLatitude - cosAltitude * sinLatitude * cosAzimuth
+  );
+  const rightAscension = wrapHours(getLocalSiderealHours() - (hourAngle * 12) / Math.PI);
+
+  return {
+    ra: rightAscension,
+    dec: (declination * 180) / Math.PI
+  };
+}
+
+function screenToLonLat(x, y) {
+  const width = canvas.clientWidth;
+  const height = canvas.clientHeight;
+  const center = getViewCenter();
+
+  if (state.projection === "orthographic") {
+    const scale = getProjectionScale();
+    const projectedX = (width / 2 - x) / scale.x;
+    const projectedY = (height / 2 - y) / scale.y;
+    const rho = Math.hypot(projectedX, projectedY);
+    if (rho > 1) {
+      return null;
+    }
+    if (rho < 1e-6) {
+      return { lon: center.lon, lat: center.lat };
+    }
+
+    const c = Math.asin(rho);
+    const sinC = Math.sin(c);
+    const cosC = Math.cos(c);
+    const phi1 = (center.lat * Math.PI) / 180;
+    const sinPhi1 = Math.sin(phi1);
+    const cosPhi1 = Math.cos(phi1);
+    const latitude = Math.asin(cosC * sinPhi1 + (projectedY * sinC * cosPhi1) / rho);
+    const longitude =
+      center.lon +
+      (Math.atan2(
+        projectedX * sinC,
+        rho * cosPhi1 * cosC - projectedY * sinPhi1 * sinC
+      ) *
+        180) /
+        Math.PI;
+
+    return { lon: wrapDegrees(longitude), lat: (latitude * 180) / Math.PI };
+  }
+
+  if (state.projection === "stereographic") {
+    const scaleX = canvas.clientWidth * 0.23 * state.zoom;
+    const scaleY = canvas.clientHeight * 0.23 * state.zoom;
+    const projectedX = (width / 2 - x) / scaleX;
+    const projectedY = (height / 2 - y) / scaleY;
+    const rho = Math.hypot(projectedX, projectedY);
+    if (rho < 1e-6) {
+      return { lon: center.lon, lat: center.lat };
+    }
+
+    const c = 2 * Math.atan(rho / 2);
+    const sinC = Math.sin(c);
+    const cosC = Math.cos(c);
+    const phi1 = (center.lat * Math.PI) / 180;
+    const sinPhi1 = Math.sin(phi1);
+    const cosPhi1 = Math.cos(phi1);
+    const latitude = Math.asin(cosC * sinPhi1 + (projectedY * sinC * cosPhi1) / rho);
+    const longitude =
+      center.lon +
+      (Math.atan2(
+        projectedX * sinC,
+        rho * cosPhi1 * cosC - projectedY * sinPhi1 * sinC
+      ) *
+        180) /
+        Math.PI;
+
+    return { lon: wrapDegrees(longitude), lat: (latitude * 180) / Math.PI };
+  }
+
+  const visibleHours = 24 / state.zoom;
+  const visibleDec = 180 / state.zoom;
+  const diffHours = -((x - width / 2) / width) * visibleHours;
+  const diffDec = ((height / 2 - y) / height) * visibleDec;
+  return {
+    lon: wrapDegrees(center.lon + diffHours * 15),
+    lat: center.lat + diffDec
+  };
+}
+
 function panByPixels(dx, dy) {
   const projection = projectionMetadata[state.projection];
   const center = getViewCenter();
@@ -972,36 +1102,9 @@ milkyWayImage.addEventListener("load", () => {
   sampleCanvas.height = sampleHeight;
   const sampleCtx = sampleCanvas.getContext("2d", { willReadFrequently: true });
   sampleCtx.drawImage(milkyWayImage, 0, 0, sampleWidth, sampleHeight);
-  const { data } = sampleCtx.getImageData(0, 0, sampleWidth, sampleHeight);
-
-  milkyWaySamples.length = 0;
-
-  for (let y = 0; y < sampleHeight; y += 3) {
-    for (let x = 0; x < sampleWidth; x += 3) {
-      const offset = (y * sampleWidth + x) * 4;
-      const red = data[offset];
-      const green = data[offset + 1];
-      const blue = data[offset + 2];
-      const luminance = red * 0.2126 + green * 0.7152 + blue * 0.0722;
-      const alpha = clamp((luminance - 14) / 120, 0, 1);
-      if (alpha < 0.12) {
-        continue;
-      }
-
-      const galacticLongitude = wrapDegrees((0.5 - x / sampleWidth) * 360);
-      const galacticLatitude = 90 - (y / sampleHeight) * 180;
-      const equatorial = galacticToEquatorial(galacticLongitude, galacticLatitude);
-
-      milkyWaySamples.push({
-        ra: equatorial.ra,
-        dec: equatorial.dec,
-        red,
-        green,
-        blue,
-        alpha
-      });
-    }
-  }
+  milkyWaySourceData = sampleCtx.getImageData(0, 0, sampleWidth, sampleHeight).data;
+  milkyWaySourceWidth = sampleWidth;
+  milkyWaySourceHeight = sampleHeight;
 
   milkyWayReady = true;
   draw();
@@ -1128,7 +1231,7 @@ function drawHorizonLine() {
 }
 
 function drawCardinalDirections() {
-  if (state.coordinateSystem !== "horizontal" || !labelsAreVisible()) {
+  if (state.coordinateSystem !== "horizontal") {
     return;
   }
 
@@ -1165,57 +1268,130 @@ function drawCardinalDirections() {
   ctx.restore();
 }
 
+function drawCardinalMeridians() {
+  if (state.coordinateSystem !== "horizontal") {
+    return;
+  }
+
+  const directions = [0, 90, 180, 270];
+
+  ctx.save();
+  ctx.strokeStyle = "rgba(246, 184, 104, 0.14)";
+  ctx.lineWidth = 1;
+
+  for (const lon of directions) {
+    let hasSegment = false;
+    ctx.beginPath();
+
+    for (let lat = 0; lat <= 85; lat += 2) {
+      const point = lonLatToScreen(lon, lat);
+      if (!point) {
+        hasSegment = false;
+        continue;
+      }
+
+      if (!hasSegment) {
+        ctx.moveTo(point.x, point.y);
+        hasSegment = true;
+      } else {
+        ctx.lineTo(point.x, point.y);
+      }
+    }
+
+    ctx.stroke();
+  }
+
+  ctx.restore();
+}
+
 function drawMilkyWayImage() {
-  if (!milkyWayReady || state.milkyWayBrightness <= 0.01) {
+  if (!milkyWayReady || state.milkyWayBrightness <= 0.01 || !milkyWaySourceData) {
     return;
   }
 
   const width = canvas.clientWidth;
   const height = canvas.clientHeight;
-  const bufferScale = 0.52;
-  const bufferWidth = Math.max(320, Math.round(width * bufferScale));
-  const bufferHeight = Math.max(320, Math.round(height * bufferScale));
-  const baseRadius = 0.95 + state.zoom * 0.06;
-  const opacityScale = state.milkyWayBrightness * 0.28;
+  const bufferScale = 0.24;
+  const bufferWidth = Math.max(140, Math.round(width * bufferScale));
+  const bufferHeight = Math.max(140, Math.round(height * bufferScale));
+  const opacityScale = state.milkyWayBrightness;
 
   if (milkyWayBuffer.width !== bufferWidth || milkyWayBuffer.height !== bufferHeight) {
     milkyWayBuffer.width = bufferWidth;
     milkyWayBuffer.height = bufferHeight;
   }
 
-  milkyWayBufferCtx.clearRect(0, 0, bufferWidth, bufferHeight);
-  milkyWayBufferCtx.globalCompositeOperation = "source-over";
   milkyWayBufferCtx.imageSmoothingEnabled = true;
+  const imageData = milkyWayBufferCtx.createImageData(bufferWidth, bufferHeight);
+  const target = imageData.data;
+  const sourceWidth = milkyWaySourceWidth;
+  const sourceHeight = milkyWaySourceHeight;
 
-  for (const sample of milkyWaySamples) {
-    const point = raDecToScreen(sample.ra, sample.dec);
-    if (!point) {
-      continue;
+  for (let by = 0; by < bufferHeight; by += 1) {
+    const screenY = ((by + 0.5) / bufferHeight) * height;
+
+    for (let bx = 0; bx < bufferWidth; bx += 1) {
+      const screenX = ((bx + 0.5) / bufferWidth) * width;
+      const sky = screenToLonLat(screenX, screenY);
+      if (!sky) {
+        continue;
+      }
+
+      const equatorial =
+        state.coordinateSystem === "equatorial"
+          ? { ra: wrapHours(sky.lon / 15), dec: sky.lat }
+          : horizontalToEquatorial(sky.lon, sky.lat);
+      const galactic = equatorialToGalactic(equatorial.ra, equatorial.dec);
+      const sourceU = ((0.5 - galactic.lon / 360) % 1 + 1) % 1;
+      const sourceV = clamp((90 - galactic.lat) / 180, 0, 0.999999);
+      const sourceX = sourceU * (sourceWidth - 1);
+      const sourceY = sourceV * (sourceHeight - 1);
+      const x0 = Math.floor(sourceX);
+      const y0 = Math.floor(sourceY);
+      const x1 = (x0 + 1) % sourceWidth;
+      const y1 = Math.min(sourceHeight - 1, y0 + 1);
+      const tx = sourceX - x0;
+      const ty = sourceY - y0;
+      const offset00 = (y0 * sourceWidth + x0) * 4;
+      const offset10 = (y0 * sourceWidth + x1) * 4;
+      const offset01 = (y1 * sourceWidth + x0) * 4;
+      const offset11 = (y1 * sourceWidth + x1) * 4;
+
+      const red =
+        milkyWaySourceData[offset00] * (1 - tx) * (1 - ty) +
+        milkyWaySourceData[offset10] * tx * (1 - ty) +
+        milkyWaySourceData[offset01] * (1 - tx) * ty +
+        milkyWaySourceData[offset11] * tx * ty;
+      const green =
+        milkyWaySourceData[offset00 + 1] * (1 - tx) * (1 - ty) +
+        milkyWaySourceData[offset10 + 1] * tx * (1 - ty) +
+        milkyWaySourceData[offset01 + 1] * (1 - tx) * ty +
+        milkyWaySourceData[offset11 + 1] * tx * ty;
+      const blue =
+        milkyWaySourceData[offset00 + 2] * (1 - tx) * (1 - ty) +
+        milkyWaySourceData[offset10 + 2] * tx * (1 - ty) +
+        milkyWaySourceData[offset01 + 2] * (1 - tx) * ty +
+        milkyWaySourceData[offset11 + 2] * tx * ty;
+      const luminance = red * 0.2126 + green * 0.7152 + blue * 0.0722;
+      const alpha = clamp(((luminance - 10) / 145) * opacityScale, 0, 1);
+      if (alpha <= 0.01) {
+        continue;
+      }
+
+      const targetOffset = (by * bufferWidth + bx) * 4;
+      target[targetOffset] = red;
+      target[targetOffset + 1] = green;
+      target[targetOffset + 2] = blue;
+      target[targetOffset + 3] = Math.round(alpha * 255);
     }
-    if (
-      point.x < -64 ||
-      point.x > width + 64 ||
-      point.y < -64 ||
-      point.y > height + 64
-    ) {
-      continue;
-    }
-
-    const bufferX = point.x * bufferScale;
-    const bufferY = point.y * bufferScale;
-    const opacity = sample.alpha * opacityScale;
-    const radius = (baseRadius + sample.alpha * 1.9) * bufferScale;
-
-    milkyWayBufferCtx.fillStyle = `rgba(${sample.red}, ${sample.green}, ${sample.blue}, ${opacity.toFixed(3)})`;
-    milkyWayBufferCtx.beginPath();
-    milkyWayBufferCtx.ellipse(bufferX, bufferY, radius * 2.4, radius * 1.18, 0, 0, Math.PI * 2);
-    milkyWayBufferCtx.fill();
   }
+
+  milkyWayBufferCtx.putImageData(imageData, 0, 0);
 
   ctx.save();
   ctx.globalCompositeOperation = "screen";
   ctx.globalAlpha = 0.92;
-  ctx.filter = "blur(12px) saturate(0.94)";
+  ctx.filter = "blur(8px) saturate(0.94)";
   ctx.drawImage(milkyWayBuffer, 0, 0, width, height);
   ctx.filter = "none";
   ctx.restore();
@@ -1531,6 +1707,7 @@ function draw() {
   drawMilkyWayImage();
   drawGrid();
   drawHorizonLine();
+  drawCardinalMeridians();
   drawCardinalDirections();
   drawConstellations();
   drawAsterisms();
