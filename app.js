@@ -678,6 +678,13 @@ function setViewCenter(lon, lat) {
   state.centerAlt = clamp(lat, -85, 85);
 }
 
+function getProjectionScale() {
+  return {
+    x: canvas.clientWidth * 0.46 * state.zoom,
+    y: canvas.clientHeight * 0.46 * state.zoom
+  };
+}
+
 function lonLatToScreen(lon, lat, offsetWrap = 0) {
   const width = canvas.clientWidth;
   const height = canvas.clientHeight;
@@ -699,10 +706,10 @@ function lonLatToScreen(lon, lat, offsetWrap = 0) {
       return null;
     }
 
-    const radius = Math.min(width, height) * 0.46 * state.zoom;
+    const scale = getProjectionScale();
     return {
-      x: width / 2 - radius * cosPhi * sinLambda,
-      y: height / 2 - radius * (cosPhi1 * sinPhi - sinPhi1 * cosPhi * cosLambda)
+      x: width / 2 - scale.x * cosPhi * sinLambda,
+      y: height / 2 - scale.y * (cosPhi1 * sinPhi - sinPhi1 * cosPhi * cosLambda)
     };
   }
 
@@ -713,10 +720,13 @@ function lonLatToScreen(lon, lat, offsetWrap = 0) {
     }
 
     const k = 2 / denominator;
-    const radius = Math.min(width, height) * 0.23 * state.zoom;
+    const scale = {
+      x: canvas.clientWidth * 0.23 * state.zoom,
+      y: canvas.clientHeight * 0.23 * state.zoom
+    };
     return {
-      x: width / 2 - radius * k * cosPhi * sinLambda,
-      y: height / 2 - radius * k * (cosPhi1 * sinPhi - sinPhi1 * cosPhi * cosLambda)
+      x: width / 2 - scale.x * k * cosPhi * sinLambda,
+      y: height / 2 - scale.y * k * (cosPhi1 * sinPhi - sinPhi1 * cosPhi * cosLambda)
     };
   }
 
@@ -1123,11 +1133,12 @@ function drawBackdrop() {
   ctx.fillRect(0, 0, width, height);
 
   if (state.projection === "orthographic" || state.projection === "stereographic") {
+    const scale = getProjectionScale();
     ctx.save();
     ctx.strokeStyle = "rgba(159, 208, 255, 0.16)";
     ctx.lineWidth = 1;
     ctx.beginPath();
-    ctx.arc(width / 2, height / 2, Math.min(width, height) * 0.46, 0, Math.PI * 2);
+    ctx.ellipse(width / 2, height / 2, scale.x, scale.y, 0, 0, Math.PI * 2);
     ctx.stroke();
     ctx.restore();
   }
