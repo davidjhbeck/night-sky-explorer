@@ -988,7 +988,7 @@ milkyWayImage.addEventListener("load", () => {
         continue;
       }
 
-      const galacticLongitude = (x / sampleWidth) * 360;
+      const galacticLongitude = wrapDegrees(((x / sampleWidth) - 0.5) * 360);
       const galacticLatitude = 90 - (y / sampleHeight) * 180;
       const equatorial = galacticToEquatorial(galacticLongitude, galacticLatitude);
 
@@ -1813,10 +1813,10 @@ seasonDayWheel.addEventListener("pointermove", (event) => {
   }
 
   const deltaX = event.clientX - seasonWheelGesture.startX;
-  const totalDays = deltaX / 18;
+  const totalDays = deltaX / 4;
   const stepDays = totalDays - seasonWheelGesture.accumulatedDays;
 
-  if (Math.abs(stepDays) >= 0.18) {
+  if (Math.abs(stepDays) >= 0.35) {
     seasonWheelGesture.accumulatedDays = totalDays;
     nudgeSeasonDay(stepDays);
   }

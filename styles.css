@@ -274,10 +274,10 @@ h1 {
   display: flex;
   flex-direction: column;
   align-items: stretch;
-  gap: 14px;
+  gap: 8px;
   max-width: min(100%, 100vw - 40px);
   width: min(100%, 680px);
-  padding: 18px 18px;
+  padding: 10px 12px;
   border-radius: 18px;
   border: 1px solid rgba(159, 208, 255, 0.18);
   background: rgba(3, 8, 18, 0.78);
@@ -289,7 +289,7 @@ h1 {
 .overlay-control {
   display: flex;
   flex-direction: column;
-  gap: 10px;
+  gap: 5px;
   min-width: 0;
   width: 100%;
 }
@@ -314,15 +314,15 @@ h1 {
   display: flex;
   align-items: center;
   justify-content: center;
-  min-height: 86px;
+  min-height: 54px;
   width: 100%;
-  padding: 18px 20px;
+  padding: 10px 16px;
   border: 1px solid rgba(159, 208, 255, 0.22);
   border-radius: 16px;
   background: rgba(4, 10, 21, 0.88);
   box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.03);
   font-family: "Space Mono", monospace;
-  font-size: 1.08rem;
+  font-size: 0.98rem;
   color: var(--text);
   user-select: none;
   -webkit-user-select: none;
@@ -337,8 +337,8 @@ h1 {
 .time-wheel::after {
   content: "";
   position: absolute;
-  top: 18%;
-  bottom: 18%;
+  top: 20%;
+  bottom: 20%;
   width: 1px;
   background: rgba(159, 208, 255, 0.12);
 }
@@ -529,16 +529,16 @@ h1 {
 
   .overlay-dock {
     width: 100%;
-    padding: 14px 14px;
-    gap: 12px;
+    padding: 10px 12px;
+    gap: 8px;
     align-items: stretch;
     max-width: 100%;
   }
 
   .time-wheel {
-    min-height: 80px;
-    padding: 16px 18px;
-    font-size: 1rem;
+    min-height: 52px;
+    padding: 9px 14px;
+    font-size: 0.94rem;
   }
 }
 
@@ -620,7 +620,7 @@ h1 {
     flex-direction: column;
     align-items: stretch;
     width: auto;
-    padding: 14px 14px;
+    padding: 10px 12px;
   }
 
   .overlay-control-label {
@@ -628,8 +628,8 @@ h1 {
   }
 
   .time-wheel {
-    min-height: 78px;
-    padding: 15px 16px;
-    font-size: 0.98rem;
+    min-height: 50px;
+    padding: 8px 14px;
+    font-size: 0.92rem;
   }
 }
