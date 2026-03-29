@@ -807,19 +807,158 @@ function isNorthAmericaDst(date) {
   return date.getTime() >= start && date.getTime() < end;
 }
 
+function isEuropeDst(date) {
+  const year = date.getFullYear();
+  const marchLastDay = new Date(Date.UTC(year, 2 + 1, 0));
+  const octoberLastDay = new Date(Date.UTC(year, 9 + 1, 0));
+  const marchLastSunday = marchLastDay.getUTCDate() - marchLastDay.getUTCDay();
+  const octoberLastSunday = octoberLastDay.getUTCDate() - octoberLastDay.getUTCDay();
+  const start = Date.UTC(year, 2, marchLastSunday, 1);
+  const end = Date.UTC(year, 9, octoberLastSunday, 1);
+  return date.getTime() >= start && date.getTime() < end;
+}
+
+function isAustraliaDst(date) {
+  const year = date.getFullYear();
+  const october = new Date(Date.UTC(year, 9, 1));
+  const april = new Date(Date.UTC(year + 1, 3, 1));
+  const firstSundayOctober = 1 + ((7 - october.getUTCDay()) % 7);
+  const firstSundayApril = 1 + ((7 - april.getUTCDay()) % 7);
+  const start = Date.UTC(year, 9, firstSundayOctober, 2);
+  const end = Date.UTC(year + 1, 3, firstSundayApril, 3);
+  const current = date.getTime();
+  return current >= start || current < end;
+}
+
+function isNewZealandDst(date) {
+  const year = date.getFullYear();
+  const septemberLastDay = new Date(Date.UTC(year, 8 + 1, 0));
+  const aprilFirstDay = new Date(Date.UTC(year + 1, 3, 1));
+  const septemberLastSunday = septemberLastDay.getUTCDate() - septemberLastDay.getUTCDay();
+  const firstSundayApril = 1 + ((7 - aprilFirstDay.getUTCDay()) % 7);
+  const start = Date.UTC(year, 8, septemberLastSunday, 2);
+  const end = Date.UTC(year + 1, 3, firstSundayApril, 3);
+  const current = date.getTime();
+  return current >= start || current < end;
+}
+
+function isChileDst(date) {
+  const year = date.getFullYear();
+  const september = new Date(Date.UTC(year, 8, 1));
+  const april = new Date(Date.UTC(year + 1, 3, 1));
+  const firstSundaySeptember = 1 + ((7 - september.getUTCDay()) % 7);
+  const firstSundayApril = 1 + ((7 - april.getUTCDay()) % 7);
+  const start = Date.UTC(year, 8, firstSundaySeptember, 0);
+  const end = Date.UTC(year + 1, 3, firstSundayApril, 0);
+  const current = date.getTime();
+  return current >= start || current < end;
+}
+
+function isWithinBox(longitude, latitude, west, east, south, north) {
+  return longitude >= west && longitude <= east && latitude >= south && latitude <= north;
+}
+
 function estimateTimeZoneOffsetHours(localDate, longitude, latitude) {
-  if (latitude >= 24 && latitude <= 50 && longitude >= -125 && longitude <= -66) {
+  if (isWithinBox(longitude, latitude, -179, -154, 18, 72)) {
+    return -10;
+  }
+
+  if (isWithinBox(longitude, latitude, -170, -130, 50, 72)) {
+    return -9 + (isNorthAmericaDst(localDate) ? 1 : 0);
+  }
+
+  if (isWithinBox(longitude, latitude, -125, -66, 24, 50)) {
     let standardOffset;
-    if (longitude < -115) {
+    if (longitude < -114.5) {
       standardOffset = -8;
-    } else if (longitude < -100) {
+    } else if (longitude < -104.5 && !(latitude < 31.5 && longitude > -106.8)) {
       standardOffset = -7;
-    } else if (longitude < -85) {
+    } else if (longitude < -86) {
       standardOffset = -6;
     } else {
       standardOffset = -5;
     }
     return standardOffset + (isNorthAmericaDst(localDate) ? 1 : 0);
+  }
+
+  if (isWithinBox(longitude, latitude, -141, -52, 42, 84)) {
+    if (longitude < -128) {
+      return -8 + (isNorthAmericaDst(localDate) ? 1 : 0);
+    }
+    if (longitude < -112) {
+      return -7 + (isNorthAmericaDst(localDate) ? 1 : 0);
+    }
+    if (longitude < -90) {
+      return -6 + (isNorthAmericaDst(localDate) ? 1 : 0);
+    }
+    if (longitude < -60) {
+      return -5 + (isNorthAmericaDst(localDate) ? 1 : 0);
+    }
+    return -4 + (isNorthAmericaDst(localDate) ? 1 : 0);
+  }
+
+  if (isWithinBox(longitude, latitude, -118, -86, 14, 33)) {
+    if (longitude < -112) {
+      return -8;
+    }
+    if (longitude < -102) {
+      return -7;
+    }
+    if (longitude < -90) {
+      return -6;
+    }
+    return -5;
+  }
+
+  if (isWithinBox(longitude, latitude, -81, -34, -56, 13)) {
+    if (isWithinBox(longitude, latitude, -76, -66, -56, -17)) {
+      return -4 + (isChileDst(localDate) ? 1 : 0);
+    }
+    if (longitude < -67) {
+      return -5;
+    }
+    if (longitude < -52) {
+      return -4;
+    }
+    return -3;
+  }
+
+  if (isWithinBox(longitude, latitude, -12, 3, 36, 71)) {
+    return 0 + (isEuropeDst(localDate) ? 1 : 0);
+  }
+
+  if (isWithinBox(longitude, latitude, 3, 22, 35, 71)) {
+    return 1 + (isEuropeDst(localDate) ? 1 : 0);
+  }
+
+  if (isWithinBox(longitude, latitude, 22, 41, 30, 71)) {
+    return 2 + (isEuropeDst(localDate) ? 1 : 0);
+  }
+
+  if (isWithinBox(longitude, latitude, 41, 60, 12, 70)) {
+    return 3;
+  }
+
+  if (isWithinBox(longitude, latitude, 68, 98, 6, 37)) {
+    return 5.5;
+  }
+
+  if (isWithinBox(longitude, latitude, 95, 142, -11, 6)) {
+    return longitude < 106 ? 7 : longitude < 118 ? 8 : longitude < 130 ? 8.5 : 9;
+  }
+
+  if (isWithinBox(longitude, latitude, 112, 154, -44, -10)) {
+    if (longitude < 129) {
+      return 8;
+    }
+    if (longitude < 141) {
+      return 9.5;
+    }
+    return 10 + (isAustraliaDst(localDate) ? 1 : 0);
+  }
+
+  if (isWithinBox(longitude, latitude, 166, 179, -48, -33)) {
+    return 12 + (isNewZealandDst(localDate) ? 1 : 0);
   }
 
   return Math.round(longitude / 15);
