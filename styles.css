@@ -161,6 +161,7 @@ h1 {
 
 #projection-select,
 #labels-visibility,
+#pattern-detail,
 #asterism-visibility,
 #deep-sky-visibility {
   min-width: 240px;
@@ -175,6 +176,7 @@ h1 {
 
 #projection-select:focus,
 #labels-visibility:focus,
+#pattern-detail:focus,
 #asterism-visibility:focus,
 #deep-sky-visibility:focus,
 #season-day:focus {
@@ -429,6 +431,7 @@ h1 {
 
   #projection-select,
   #labels-visibility,
+  #pattern-detail,
   #asterism-visibility,
   #deep-sky-visibility {
     min-width: min(100%, 240px);

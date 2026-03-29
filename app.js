@@ -79,7 +79,10 @@ const stars = [
   { id: "nunki", name: "Nunki", constellation: "Sagittarius", ra: 18.92, dec: -26.3, mag: 2.05 },
   { id: "kaus-australis", name: "Kaus Australis", constellation: "Sagittarius", ra: 18.4, dec: -34.38, mag: 1.79 },
   { id: "kaus-media", name: "Kaus Media", constellation: "Sagittarius", ra: 18.35, dec: -29.83, mag: 2.72 },
+  { id: "kaus-borealis", name: "Kaus Borealis", constellation: "Sagittarius", ra: 18.47, dec: -25.42, mag: 2.82 },
   { id: "ascella", name: "Ascella", constellation: "Sagittarius", ra: 19.04, dec: -29.88, mag: 2.6 },
+  { id: "phi-sgr", name: "Phi Sagittarii", constellation: "Sagittarius", ra: 18.76, dec: -26.99, mag: 3.17 },
+  { id: "alnasl", name: "Alnasl", constellation: "Sagittarius", ra: 18.1, dec: -30.42, mag: 2.98 },
   { id: "deneb-kaitos", name: "Deneb Kaitos", constellation: "Cetus", ra: 0.73, dec: -17.99, mag: 2.04 },
   { id: "achernar", name: "Achernar", constellation: "Eridanus", ra: 1.63, dec: -57.24, mag: 0.46 }
 ];
@@ -254,7 +257,13 @@ const constellations = [
     ],
     extraSegments: [
       ["kaus-australis", "nunki"],
-      ["kaus-media", "ascella"]
+      ["kaus-media", "ascella"],
+      ["kaus-borealis", "phi-sgr"],
+      ["phi-sgr", "nunki"],
+      ["phi-sgr", "ascella"],
+      ["kaus-media", "alnasl"],
+      ["alnasl", "kaus-australis"],
+      ["kaus-borealis", "kaus-media"]
     ]
   },
   {
@@ -343,6 +352,9 @@ const asterisms = [
     segments: [
       ["polaris", "pherkad"],
       ["pherkad", "kochab"]
+    ],
+    extraSegments: [
+      ["polaris", "kochab"]
     ]
   },
   {
@@ -376,6 +388,10 @@ const asterisms = [
       ["sirius", "procyon"],
       ["procyon", "pollux"],
       ["pollux", "capella"]
+    ],
+    extraSegments: [
+      ["capella", "rigel"],
+      ["aldebaran", "sirius"]
     ]
   },
   {
@@ -398,6 +414,14 @@ const asterisms = [
       ["kaus-media", "nunki"],
       ["nunki", "ascella"],
       ["ascella", "kaus-australis"]
+    ],
+    extraSegments: [
+      ["kaus-borealis", "kaus-media"],
+      ["kaus-borealis", "phi-sgr"],
+      ["phi-sgr", "nunki"],
+      ["phi-sgr", "ascella"],
+      ["kaus-media", "alnasl"],
+      ["alnasl", "kaus-australis"]
     ]
   },
   {
@@ -476,6 +500,24 @@ const deepSkyObjects = [
   { id: "m55", name: "M55", type: "cluster", ra: 19.67, dec: -30.97, mag: 6.3 }
 ];
 
+const milkyWaySpine = [
+  { ra: 0.8, dec: 61, width: 22, color: "rgba(124, 146, 255, 0.03)" },
+  { ra: 2.2, dec: 55, width: 21, color: "rgba(125, 157, 255, 0.03)" },
+  { ra: 4.6, dec: 31, width: 18, color: "rgba(122, 164, 255, 0.026)" },
+  { ra: 6.1, dec: -8, width: 16, color: "rgba(126, 176, 255, 0.024)" },
+  { ra: 7.8, dec: -33, width: 15, color: "rgba(145, 184, 255, 0.022)" },
+  { ra: 9.6, dec: -52, width: 15, color: "rgba(196, 176, 126, 0.02)" },
+  { ra: 12.3, dec: -60, width: 16, color: "rgba(222, 176, 117, 0.02)" },
+  { ra: 14.8, dec: -45, width: 17, color: "rgba(209, 172, 112, 0.022)" },
+  { ra: 16.7, dec: -29, width: 22, color: "rgba(236, 169, 102, 0.028)" },
+  { ra: 17.9, dec: -28, width: 28, color: "rgba(244, 186, 113, 0.034)" },
+  { ra: 18.7, dec: -16, width: 26, color: "rgba(248, 205, 130, 0.038)" },
+  { ra: 19.7, dec: 6, width: 22, color: "rgba(166, 181, 255, 0.028)" },
+  { ra: 20.5, dec: 33, width: 20, color: "rgba(130, 166, 255, 0.03)" },
+  { ra: 21.8, dec: 51, width: 20, color: "rgba(122, 147, 255, 0.028)" },
+  { ra: 23.1, dec: 59, width: 20, color: "rgba(118, 142, 255, 0.026)" }
+];
+
 const starMap = new Map(stars.map((star) => [star.id, star]));
 const canvas = document.getElementById("star-map");
 const ctx = canvas.getContext("2d");
@@ -485,6 +527,7 @@ const objectCoords = document.getElementById("object-coords");
 const objectCard = document.getElementById("object-card");
 const projectionDescription = document.getElementById("projection-description");
 const labelsVisibilitySelect = document.getElementById("labels-visibility");
+const patternDetailSelect = document.getElementById("pattern-detail");
 const asterismVisibilitySelect = document.getElementById("asterism-visibility");
 const deepSkyVisibilitySelect = document.getElementById("deep-sky-visibility");
 const mobileControlsShell = document.getElementById("mobile-controls-shell");
@@ -1034,6 +1077,70 @@ function drawCardinalDirections() {
   ctx.restore();
 }
 
+function drawMilkyWay() {
+  ctx.save();
+
+  for (let index = 0; index < milkyWaySpine.length - 1; index += 1) {
+    const current = milkyWaySpine[index];
+    const next = milkyWaySpine[index + 1];
+    const steps = 10;
+
+    for (let step = 0; step <= steps; step += 1) {
+      const t = step / steps;
+      const ra = current.ra + (next.ra - current.ra) * t;
+      const dec = current.dec + (next.dec - current.dec) * t;
+      const widthDeg = current.width + (next.width - current.width) * t;
+      const point = raDecToScreen(ra, dec);
+      const forwardPoint = raDecToScreen(
+        current.ra + (next.ra - current.ra) * Math.min(1, t + 0.08),
+        current.dec + (next.dec - current.dec) * Math.min(1, t + 0.08)
+      );
+
+      if (!point || !forwardPoint) {
+        continue;
+      }
+
+      const angle = Math.atan2(forwardPoint.y - point.y, forwardPoint.x - point.x);
+      const major = Math.max(24, (widthDeg / projectionMetadata[state.projection].verticalSpanDeg) * canvas.clientHeight * state.zoom * 1.25);
+      const minor = major * 0.34;
+
+      ctx.save();
+      ctx.translate(point.x, point.y);
+      ctx.rotate(angle);
+      ctx.fillStyle = current.color;
+      ctx.beginPath();
+      ctx.ellipse(0, 0, major, minor, 0, 0, Math.PI * 2);
+      ctx.fill();
+      ctx.restore();
+    }
+  }
+
+  const accentClouds = [
+    { ra: 18.3, dec: -28, rx: 88, ry: 28, color: "rgba(246, 194, 120, 0.05)" },
+    { ra: 20.3, dec: 38, rx: 74, ry: 22, color: "rgba(138, 162, 255, 0.04)" },
+    { ra: 6.2, dec: -6, rx: 66, ry: 20, color: "rgba(140, 174, 255, 0.03)" },
+    { ra: 12.8, dec: -60, rx: 68, ry: 24, color: "rgba(239, 183, 111, 0.04)" }
+  ];
+
+  for (const cloud of accentClouds) {
+    const point = raDecToScreen(cloud.ra, cloud.dec);
+    if (!point) {
+      continue;
+    }
+
+    const gradient = ctx.createRadialGradient(point.x, point.y, 0, point.x, point.y, cloud.rx);
+    gradient.addColorStop(0, cloud.color);
+    gradient.addColorStop(0.55, cloud.color.replace(/0\.\d+\)/, "0.018)"));
+    gradient.addColorStop(1, "rgba(0, 0, 0, 0)");
+    ctx.fillStyle = gradient;
+    ctx.beginPath();
+    ctx.ellipse(point.x, point.y, cloud.rx, cloud.ry, 0, 0, Math.PI * 2);
+    ctx.fill();
+  }
+
+  ctx.restore();
+}
+
 function drawConstellations() {
   if (!labelsAreVisible()) {
     return;
@@ -1075,6 +1182,9 @@ function drawAsterisms() {
     const wrapOffsets = projectionMetadata[state.projection].drawWrapCopies ? [-360, 0, 360] : [0];
     for (const wrapOffset of wrapOffsets) {
       drawConstellationSegments(asterism.segments, wrapOffset, 1, "rgba(238, 224, 161, 0.18)");
+      if (state.constellationDetail === "full" && asterism.extraSegments?.length) {
+        drawConstellationSegments(asterism.extraSegments, wrapOffset, 1, "rgba(238, 224, 161, 0.14)");
+      }
       const labelPoint = raDecToScreen(asterism.labelRa, asterism.labelDec, wrapOffset);
       if (labelPoint && labelPoint.x > -120 && labelPoint.x < canvas.clientWidth + 120) {
         ctx.fillText(asterism.name, labelPoint.x + 6, labelPoint.y - 10);
@@ -1338,6 +1448,7 @@ function nudgeObserverLatitude(deltaDegrees) {
 function draw() {
   ctx.clearRect(0, 0, canvas.clientWidth, canvas.clientHeight);
   drawBackdrop();
+  drawMilkyWay();
   drawGrid();
   drawHorizonLine();
   drawCardinalDirections();
@@ -1512,6 +1623,11 @@ canvas.addEventListener("wheel", (event) => {
 
 labelsVisibilitySelect.addEventListener("change", (event) => {
   state.labelsVisibility = event.target.value;
+  draw();
+});
+
+patternDetailSelect.addEventListener("change", (event) => {
+  state.constellationDetail = event.target.value;
   draw();
 });
 
@@ -1716,6 +1832,7 @@ window.addEventListener("resize", resizeCanvas);
 updateInfoCard(state.hoverStar);
 projectionDescription.textContent = projectionMetadata[state.projection].label;
 labelsVisibilitySelect.value = state.labelsVisibility;
+patternDetailSelect.value = state.constellationDetail;
 asterismVisibilitySelect.value = state.asterismVisibility;
 deepSkyVisibilitySelect.value = state.deepSkyVisibility;
 updateSeasonWheel();
