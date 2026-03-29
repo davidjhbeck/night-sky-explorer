@@ -930,6 +930,44 @@ function drawGrid() {
   ctx.restore();
 }
 
+function drawCardinalDirections() {
+  if (state.coordinateSystem !== "horizontal") {
+    return;
+  }
+
+  const directions = [
+    { label: "N", lon: 0 },
+    { label: "E", lon: 270 },
+    { label: "S", lon: 180 },
+    { label: "W", lon: 90 }
+  ];
+
+  ctx.save();
+  ctx.fillStyle = "rgba(246, 184, 104, 0.52)";
+  ctx.font = '12px "Space Mono", monospace';
+  ctx.textAlign = "center";
+  ctx.textBaseline = "bottom";
+
+  for (const direction of directions) {
+    const point = lonLatToScreen(direction.lon, 3);
+    if (!point) {
+      continue;
+    }
+    if (
+      point.x < 16 ||
+      point.x > canvas.clientWidth - 16 ||
+      point.y < 16 ||
+      point.y > canvas.clientHeight - 16
+    ) {
+      continue;
+    }
+
+    ctx.fillText(direction.label, point.x, point.y - 4);
+  }
+
+  ctx.restore();
+}
+
 function drawConstellations() {
   ctx.save();
   ctx.fillStyle = "rgba(159, 208, 255, 0.78)";
@@ -1191,6 +1229,7 @@ function draw() {
   ctx.clearRect(0, 0, canvas.clientWidth, canvas.clientHeight);
   drawBackdrop();
   drawGrid();
+  drawCardinalDirections();
   drawConstellations();
   drawAsterisms();
   drawDeepSkyObjects();
