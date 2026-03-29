@@ -53,10 +53,10 @@
           </label>
 
           <label class="projection-select-wrap" for="pattern-detail">
-            <span class="toolbar-label">Sky pattern detail</span>
+            <span class="toolbar-label">Pattern detail</span>
             <select id="pattern-detail" aria-label="Choose constellation and asterism detail">
-              <option value="simple">Simplified lines</option>
-              <option value="full" selected>Detailed lines</option>
+              <option value="simple">Simple</option>
+              <option value="full" selected>Full</option>
             </select>
           </label>
 
@@ -105,6 +105,22 @@
                 aria-label="Adjust labeled star size"
               />
               <span class="slider-value" id="foreground-size-value">70%</span>
+            </div>
+          </label>
+
+          <label class="projection-select-wrap slider-wrap" for="milky-way-brightness">
+            <span class="toolbar-label">Milky Way brightness</span>
+            <div class="slider-row">
+              <input
+                id="milky-way-brightness"
+                type="range"
+                min="0"
+                max="100"
+                value="28"
+                step="1"
+                aria-label="Adjust Milky Way background brightness"
+              />
+              <span class="slider-value" id="milky-way-brightness-value">28%</span>
             </div>
           </label>
           </div>

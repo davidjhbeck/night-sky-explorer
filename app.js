@@ -1,5 +1,8 @@
 const stars = [
   { id: "polaris", name: "Polaris", constellation: "Ursa Minor", ra: 2.53, dec: 89.26, mag: 1.98 },
+  { id: "yildun", name: "Yildun", constellation: "Ursa Minor", ra: 17.54, dec: 86.58, mag: 4.35 },
+  { id: "epsilon-umi", name: "Epsilon Ursae Minoris", constellation: "Ursa Minor", ra: 16.77, dec: 82.04, mag: 4.23 },
+  { id: "zeta-umi", name: "Zeta Ursae Minoris", constellation: "Ursa Minor", ra: 15.73, dec: 77.79, mag: 4.32 },
   { id: "kochab", name: "Kochab", constellation: "Ursa Minor", ra: 14.85, dec: 74.16, mag: 2.08 },
   { id: "pherkad", name: "Pherkad", constellation: "Ursa Minor", ra: 15.35, dec: 71.83, mag: 3.0 },
   { id: "dubhe", name: "Dubhe", constellation: "Ursa Major", ra: 11.06, dec: 61.75, mag: 1.79 },
@@ -354,7 +357,11 @@ const asterisms = [
       ["pherkad", "kochab"]
     ],
     extraSegments: [
-      ["polaris", "kochab"]
+      ["polaris", "yildun"],
+      ["yildun", "epsilon-umi"],
+      ["epsilon-umi", "zeta-umi"],
+      ["zeta-umi", "kochab"],
+      ["zeta-umi", "pherkad"]
     ]
   },
   {
@@ -421,7 +428,9 @@ const asterisms = [
       ["phi-sgr", "nunki"],
       ["phi-sgr", "ascella"],
       ["kaus-media", "alnasl"],
-      ["alnasl", "kaus-australis"]
+      ["alnasl", "kaus-australis"],
+      ["kaus-borealis", "alnasl"],
+      ["kaus-borealis", "nunki"]
     ]
   },
   {
@@ -500,24 +509,6 @@ const deepSkyObjects = [
   { id: "m55", name: "M55", type: "cluster", ra: 19.67, dec: -30.97, mag: 6.3 }
 ];
 
-const milkyWaySpine = [
-  { ra: 0.8, dec: 61, width: 22, color: "rgba(124, 146, 255, 0.03)" },
-  { ra: 2.2, dec: 55, width: 21, color: "rgba(125, 157, 255, 0.03)" },
-  { ra: 4.6, dec: 31, width: 18, color: "rgba(122, 164, 255, 0.026)" },
-  { ra: 6.1, dec: -8, width: 16, color: "rgba(126, 176, 255, 0.024)" },
-  { ra: 7.8, dec: -33, width: 15, color: "rgba(145, 184, 255, 0.022)" },
-  { ra: 9.6, dec: -52, width: 15, color: "rgba(196, 176, 126, 0.02)" },
-  { ra: 12.3, dec: -60, width: 16, color: "rgba(222, 176, 117, 0.02)" },
-  { ra: 14.8, dec: -45, width: 17, color: "rgba(209, 172, 112, 0.022)" },
-  { ra: 16.7, dec: -29, width: 22, color: "rgba(236, 169, 102, 0.028)" },
-  { ra: 17.9, dec: -28, width: 28, color: "rgba(244, 186, 113, 0.034)" },
-  { ra: 18.7, dec: -16, width: 26, color: "rgba(248, 205, 130, 0.038)" },
-  { ra: 19.7, dec: 6, width: 22, color: "rgba(166, 181, 255, 0.028)" },
-  { ra: 20.5, dec: 33, width: 20, color: "rgba(130, 166, 255, 0.03)" },
-  { ra: 21.8, dec: 51, width: 20, color: "rgba(122, 147, 255, 0.028)" },
-  { ra: 23.1, dec: 59, width: 20, color: "rgba(118, 142, 255, 0.026)" }
-];
-
 const starMap = new Map(stars.map((star) => [star.id, star]));
 const canvas = document.getElementById("star-map");
 const ctx = canvas.getContext("2d");
@@ -541,6 +532,8 @@ const fieldBrightnessInput = document.getElementById("field-brightness");
 const fieldBrightnessValue = document.getElementById("field-brightness-value");
 const foregroundSizeInput = document.getElementById("foreground-size");
 const foregroundSizeValue = document.getElementById("foreground-size-value");
+const milkyWayBrightnessInput = document.getElementById("milky-way-brightness");
+const milkyWayBrightnessValue = document.getElementById("milky-way-brightness-value");
 
 const projectionMetadata = {
   equirectangular: {
@@ -568,6 +561,11 @@ const allStars = [...fieldStars, ...stars];
 const MAX_ZOOM = 12;
 const currentDate = new Date();
 const currentSeasonYear = currentDate.getFullYear();
+const milkyWayImage = new Image();
+milkyWayImage.crossOrigin = "anonymous";
+milkyWayImage.src = "https://upload.wikimedia.org/wikipedia/commons/6/60/ESO_-_Milky_Way.jpg";
+const milkyWaySamples = [];
+let milkyWayReady = false;
 
 const state = {
   centerRa: 6,
@@ -589,7 +587,8 @@ const state = {
   timeOfDayHours: 22,
   seasonDay: getDayOfYear(currentDate),
   fieldStarBrightness: 1.6,
-  foregroundStarScale: 0.7
+  foregroundStarScale: 0.7,
+  milkyWayBrightness: 0.28
 };
 
 const activePointers = new Map();
@@ -919,6 +918,45 @@ function resetTouchGesture(points) {
   touchGesture.midpointY = midpoint.y;
 }
 
+milkyWayImage.addEventListener("load", () => {
+  const sampleCanvas = document.createElement("canvas");
+  const sampleWidth = 420;
+  const sampleHeight = 210;
+  sampleCanvas.width = sampleWidth;
+  sampleCanvas.height = sampleHeight;
+  const sampleCtx = sampleCanvas.getContext("2d", { willReadFrequently: true });
+  sampleCtx.drawImage(milkyWayImage, 0, 0, sampleWidth, sampleHeight);
+  const { data } = sampleCtx.getImageData(0, 0, sampleWidth, sampleHeight);
+
+  milkyWaySamples.length = 0;
+
+  for (let y = 0; y < sampleHeight; y += 2) {
+    for (let x = 0; x < sampleWidth; x += 2) {
+      const offset = (y * sampleWidth + x) * 4;
+      const red = data[offset];
+      const green = data[offset + 1];
+      const blue = data[offset + 2];
+      const luminance = red * 0.2126 + green * 0.7152 + blue * 0.0722;
+      const alpha = clamp((luminance - 18) / 110, 0, 1);
+      if (alpha < 0.12) {
+        continue;
+      }
+
+      milkyWaySamples.push({
+        lon: (x / sampleWidth) * 360,
+        lat: 90 - (y / sampleHeight) * 180,
+        red,
+        green,
+        blue,
+        alpha
+      });
+    }
+  }
+
+  milkyWayReady = true;
+  draw();
+});
+
 function updateInfoCard(star) {
   objectName.textContent = star.name;
   objectMeta.textContent = `${star.constellation} • mag ${star.mag.toFixed(2)}`;
@@ -1077,64 +1115,32 @@ function drawCardinalDirections() {
   ctx.restore();
 }
 
-function drawMilkyWay() {
-  ctx.save();
-
-  for (let index = 0; index < milkyWaySpine.length - 1; index += 1) {
-    const current = milkyWaySpine[index];
-    const next = milkyWaySpine[index + 1];
-    const steps = 10;
-
-    for (let step = 0; step <= steps; step += 1) {
-      const t = step / steps;
-      const ra = current.ra + (next.ra - current.ra) * t;
-      const dec = current.dec + (next.dec - current.dec) * t;
-      const widthDeg = current.width + (next.width - current.width) * t;
-      const point = raDecToScreen(ra, dec);
-      const forwardPoint = raDecToScreen(
-        current.ra + (next.ra - current.ra) * Math.min(1, t + 0.08),
-        current.dec + (next.dec - current.dec) * Math.min(1, t + 0.08)
-      );
-
-      if (!point || !forwardPoint) {
-        continue;
-      }
-
-      const angle = Math.atan2(forwardPoint.y - point.y, forwardPoint.x - point.x);
-      const major = Math.max(24, (widthDeg / projectionMetadata[state.projection].verticalSpanDeg) * canvas.clientHeight * state.zoom * 1.25);
-      const minor = major * 0.34;
-
-      ctx.save();
-      ctx.translate(point.x, point.y);
-      ctx.rotate(angle);
-      ctx.fillStyle = current.color;
-      ctx.beginPath();
-      ctx.ellipse(0, 0, major, minor, 0, 0, Math.PI * 2);
-      ctx.fill();
-      ctx.restore();
-    }
+function drawMilkyWayImage() {
+  if (!milkyWayReady || state.milkyWayBrightness <= 0.01) {
+    return;
   }
 
-  const accentClouds = [
-    { ra: 18.3, dec: -28, rx: 88, ry: 28, color: "rgba(246, 194, 120, 0.05)" },
-    { ra: 20.3, dec: 38, rx: 74, ry: 22, color: "rgba(138, 162, 255, 0.04)" },
-    { ra: 6.2, dec: -6, rx: 66, ry: 20, color: "rgba(140, 174, 255, 0.03)" },
-    { ra: 12.8, dec: -60, rx: 68, ry: 24, color: "rgba(239, 183, 111, 0.04)" }
-  ];
+  ctx.save();
 
-  for (const cloud of accentClouds) {
-    const point = raDecToScreen(cloud.ra, cloud.dec);
+  for (const sample of milkyWaySamples) {
+    const point = lonLatToScreen(sample.lon, sample.lat);
     if (!point) {
       continue;
     }
+    if (
+      point.x < -20 ||
+      point.x > canvas.clientWidth + 20 ||
+      point.y < -20 ||
+      point.y > canvas.clientHeight + 20
+    ) {
+      continue;
+    }
 
-    const gradient = ctx.createRadialGradient(point.x, point.y, 0, point.x, point.y, cloud.rx);
-    gradient.addColorStop(0, cloud.color);
-    gradient.addColorStop(0.55, cloud.color.replace(/0\.\d+\)/, "0.018)"));
-    gradient.addColorStop(1, "rgba(0, 0, 0, 0)");
-    ctx.fillStyle = gradient;
+    const opacity = sample.alpha * state.milkyWayBrightness * 0.32;
+    const radius = Math.max(1.2, 2.4 * Math.sqrt(state.zoom));
+    ctx.fillStyle = `rgba(${sample.red}, ${sample.green}, ${sample.blue}, ${opacity.toFixed(3)})`;
     ctx.beginPath();
-    ctx.ellipse(point.x, point.y, cloud.rx, cloud.ry, 0, 0, Math.PI * 2);
+    ctx.ellipse(point.x, point.y, radius * 2.5, radius, 0, 0, Math.PI * 2);
     ctx.fill();
   }
 
@@ -1153,7 +1159,7 @@ function drawConstellations() {
     for (const wrapOffset of wrapOffsets) {
       drawConstellationSegments(constellation.segments, wrapOffset, 1.4, "rgba(159, 208, 255, 0.55)");
       if (state.constellationDetail === "full" && constellation.extraSegments?.length) {
-        drawConstellationSegments(constellation.extraSegments, wrapOffset, 1, "rgba(159, 208, 255, 0.26)");
+        drawConstellationSegments(constellation.extraSegments, wrapOffset, 1.15, "rgba(159, 208, 255, 0.34)");
       }
 
       if (labelsAreVisible()) {
@@ -1183,7 +1189,7 @@ function drawAsterisms() {
     for (const wrapOffset of wrapOffsets) {
       drawConstellationSegments(asterism.segments, wrapOffset, 1, "rgba(238, 224, 161, 0.18)");
       if (state.constellationDetail === "full" && asterism.extraSegments?.length) {
-        drawConstellationSegments(asterism.extraSegments, wrapOffset, 1, "rgba(238, 224, 161, 0.14)");
+        drawConstellationSegments(asterism.extraSegments, wrapOffset, 1.15, "rgba(238, 224, 161, 0.24)");
       }
       const labelPoint = raDecToScreen(asterism.labelRa, asterism.labelDec, wrapOffset);
       if (labelPoint && labelPoint.x > -120 && labelPoint.x < canvas.clientWidth + 120) {
@@ -1448,7 +1454,7 @@ function nudgeObserverLatitude(deltaDegrees) {
 function draw() {
   ctx.clearRect(0, 0, canvas.clientWidth, canvas.clientHeight);
   drawBackdrop();
-  drawMilkyWay();
+  drawMilkyWayImage();
   drawGrid();
   drawHorizonLine();
   drawCardinalDirections();
@@ -1653,6 +1659,12 @@ foregroundSizeInput.addEventListener("input", (event) => {
   draw();
 });
 
+milkyWayBrightnessInput.addEventListener("input", (event) => {
+  state.milkyWayBrightness = Number(event.target.value) / 100;
+  milkyWayBrightnessValue.textContent = `${event.target.value}%`;
+  draw();
+});
+
 timeOfDayWheel.addEventListener("wheel", (event) => {
   event.preventDefault();
   const delta = Math.abs(event.deltaY) < 2 ? -event.deltaY : -Math.sign(event.deltaY);
@@ -1840,4 +1852,5 @@ updateLatitudeUI();
 updateTimeWheel();
 fieldBrightnessValue.textContent = `${fieldBrightnessInput.value}%`;
 foregroundSizeValue.textContent = `${foregroundSizeInput.value}%`;
+milkyWayBrightnessValue.textContent = `${milkyWayBrightnessInput.value}%`;
 resizeCanvas();

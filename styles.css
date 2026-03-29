@@ -196,7 +196,8 @@ h1 {
 }
 
 #field-brightness,
-#foreground-size {
+#foreground-size,
+#milky-way-brightness {
   width: min(320px, 100%);
   accent-color: #9fd0ff;
 }
@@ -442,7 +443,8 @@ h1 {
   }
 
   #field-brightness,
-  #foreground-size {
+  #foreground-size,
+  #milky-way-brightness {
     width: 100%;
   }
 
@@ -579,7 +581,7 @@ h1 {
     position: absolute;
     left: 10px;
     right: 10px;
-    bottom: 10px;
+    bottom: 20px;
     display: grid;
     grid-template-columns: repeat(3, minmax(0, 1fr));
     align-items: stretch;
