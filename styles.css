@@ -274,10 +274,10 @@ h1 {
   display: flex;
   flex-direction: column;
   align-items: stretch;
-  gap: 5px;
+  gap: 4px;
   max-width: min(100%, 100vw - 40px);
   width: min(100%, 680px);
-  padding: 6px 8px;
+  padding: 4px 6px;
   border-radius: 14px;
   border: 1px solid rgba(159, 208, 255, 0.18);
   background: rgba(3, 8, 18, 0.68);
@@ -289,14 +289,14 @@ h1 {
 .overlay-control {
   display: flex;
   flex-direction: column;
-  gap: 3px;
+  gap: 2px;
   min-width: 0;
   width: 100%;
 }
 
 .overlay-control-label {
   font-family: "Space Mono", monospace;
-  font-size: 0.6rem;
+  font-size: 0.54rem;
   letter-spacing: 0.12em;
   text-transform: uppercase;
   color: var(--accent);
@@ -314,15 +314,15 @@ h1 {
   display: flex;
   align-items: center;
   justify-content: center;
-  min-height: 36px;
+  min-height: 30px;
   width: 100%;
-  padding: 5px 12px;
+  padding: 3px 10px;
   border: 1px solid rgba(159, 208, 255, 0.22);
   border-radius: 12px;
   background: rgba(4, 10, 21, 0.88);
   box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.03);
   font-family: "Space Mono", monospace;
-  font-size: 0.82rem;
+  font-size: 0.76rem;
   color: var(--text);
   user-select: none;
   -webkit-user-select: none;
@@ -529,16 +529,16 @@ h1 {
 
   .overlay-dock {
     width: 100%;
-    padding: 6px 8px;
-    gap: 5px;
+    padding: 4px 6px;
+    gap: 4px;
     align-items: stretch;
     max-width: 100%;
   }
 
   .time-wheel {
-    min-height: 34px;
-    padding: 4px 10px;
-    font-size: 0.8rem;
+    min-height: 29px;
+    padding: 3px 9px;
+    font-size: 0.74rem;
   }
 }
 
@@ -620,16 +620,16 @@ h1 {
     flex-direction: column;
     align-items: stretch;
     width: auto;
-    padding: 6px 8px;
+    padding: 4px 6px;
   }
 
   .overlay-control-label {
-    font-size: 0.56rem;
+    font-size: 0.5rem;
   }
 
   .time-wheel {
-    min-height: 32px;
-    padding: 4px 10px;
-    font-size: 0.78rem;
+    min-height: 28px;
+    padding: 3px 9px;
+    font-size: 0.72rem;
   }
 }
