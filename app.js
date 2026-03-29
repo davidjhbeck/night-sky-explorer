@@ -543,6 +543,13 @@ const state = {
   foregroundStarScale: 0.7
 };
 
+const activePointers = new Map();
+const touchGesture = {
+  pinchDistance: 0,
+  midpointX: 0,
+  midpointY: 0
+};
+
 function deltaToPixels(delta, deltaMode, viewportSize) {
   if (deltaMode === WheelEvent.DOM_DELTA_PIXEL) {
     return delta;
@@ -764,6 +771,39 @@ function panByPixels(dx, dy) {
 
 function zoomByFactor(factor) {
   state.zoom = clamp(state.zoom * factor, 0.8, MAX_ZOOM);
+}
+
+function getCanvasPoint(event) {
+  const rect = canvas.getBoundingClientRect();
+  return {
+    x: event.clientX - rect.left,
+    y: event.clientY - rect.top
+  };
+}
+
+function getTouchDistance(points) {
+  const [first, second] = points;
+  return Math.hypot(second.x - first.x, second.y - first.y);
+}
+
+function getTouchMidpoint(points) {
+  const [first, second] = points;
+  return {
+    x: (first.x + second.x) / 2,
+    y: (first.y + second.y) / 2
+  };
+}
+
+function resetTouchGesture(points) {
+  if (points.length < 2) {
+    touchGesture.pinchDistance = 0;
+    return;
+  }
+
+  touchGesture.pinchDistance = getTouchDistance(points);
+  const midpoint = getTouchMidpoint(points);
+  touchGesture.midpointX = midpoint.x;
+  touchGesture.midpointY = midpoint.y;
 }
 
 function updateInfoCard(star) {
@@ -1127,26 +1167,67 @@ function handlePointerMove(event) {
 }
 
 canvas.addEventListener("pointerdown", (event) => {
-  const rect = canvas.getBoundingClientRect();
+  const point = getCanvasPoint(event);
   state.dragging = true;
-  state.pointerX = event.clientX - rect.left;
-  state.pointerY = event.clientY - rect.top;
+  state.pointerX = point.x;
+  state.pointerY = point.y;
   canvas.classList.add("dragging");
   canvas.setPointerCapture(event.pointerId);
+
+  if (event.pointerType === "touch") {
+    activePointers.set(event.pointerId, point);
+    resetTouchGesture([...activePointers.values()]);
+  }
 });
 
-canvas.addEventListener("pointermove", handlePointerMove);
+canvas.addEventListener("pointermove", (event) => {
+  if (event.pointerType === "touch" && activePointers.has(event.pointerId)) {
+    const point = getCanvasPoint(event);
+    activePointers.set(event.pointerId, point);
+    const points = [...activePointers.values()];
+
+    if (points.length >= 2) {
+      const midpoint = getTouchMidpoint(points);
+      const distance = getTouchDistance(points);
+
+      if (touchGesture.pinchDistance > 0) {
+        panByPixels(midpoint.x - touchGesture.midpointX, midpoint.y - touchGesture.midpointY);
+        zoomByFactor(distance / touchGesture.pinchDistance);
+        draw();
+      }
+
+      touchGesture.pinchDistance = distance;
+      touchGesture.midpointX = midpoint.x;
+      touchGesture.midpointY = midpoint.y;
+      return;
+    }
+
+    if (points.length === 1 && state.dragging) {
+      panByPixels(point.x - state.pointerX, point.y - state.pointerY);
+      state.pointerX = point.x;
+      state.pointerY = point.y;
+      draw();
+      return;
+    }
+  }
+
+  handlePointerMove(event);
+});
 
 canvas.addEventListener("pointerup", (event) => {
   state.dragging = false;
   canvas.classList.remove("dragging");
   canvas.releasePointerCapture(event.pointerId);
+  activePointers.delete(event.pointerId);
+  resetTouchGesture([...activePointers.values()]);
 });
 
 canvas.addEventListener("pointercancel", (event) => {
   state.dragging = false;
   canvas.classList.remove("dragging");
   canvas.releasePointerCapture(event.pointerId);
+  activePointers.delete(event.pointerId);
+  resetTouchGesture([...activePointers.values()]);
 });
 
 canvas.addEventListener("pointerleave", () => {
