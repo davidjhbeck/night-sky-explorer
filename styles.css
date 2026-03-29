@@ -97,6 +97,10 @@ h1 {
   background: linear-gradient(180deg, rgba(255, 255, 255, 0.03), transparent);
 }
 
+.toolbar-block {
+  min-width: 0;
+}
+
 .mobile-controls-shell {
   display: block;
 }
@@ -239,27 +243,40 @@ h1 {
 @media (max-width: 720px) {
   .app-shell {
     width: min(100% - 20px, 1160px);
-    padding-top: 18px;
+    padding-top: 10px;
+    padding-bottom: 12px;
   }
 
   .hero {
-    margin-bottom: 14px;
+    margin-bottom: 8px;
   }
 
-  .hero-copy {
+  .eyebrow,
+  .hero-copy,
+  .viewer-toolbar .toolbar-label:first-child,
+  .viewer-toolbar .toolbar-block:first-child {
     display: none;
   }
 
+  h1 {
+    font-size: clamp(1.15rem, 5vw, 1.45rem);
+    line-height: 1.05;
+  }
+
   .viewer-toolbar {
-    grid-template-columns: 1fr;
-    gap: 8px;
-    padding: 12px 14px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 10px;
+    padding: 8px 12px;
   }
 
   .mobile-controls-toggle {
     display: block;
     width: calc(100% - 28px);
-    margin: 10px 14px 0;
+    margin: 8px 14px 0;
+    padding: 9px 12px;
+    font-size: 0.95rem;
   }
 
   .mobile-controls-shell:not([open]) .projection-controls {
@@ -302,7 +319,7 @@ h1 {
   }
 
   .viewer-frame {
-    min-height: 62vh;
+    min-height: 74vh;
   }
 
   .viewer-overlay {
