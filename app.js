@@ -490,8 +490,10 @@ const asterismVisibilitySelect = document.getElementById("asterism-visibility");
 const deepSkyVisibilitySelect = document.getElementById("deep-sky-visibility");
 const coordinateSystemSelect = document.getElementById("coordinate-system");
 const observerLatitudeInput = document.getElementById("observer-latitude");
-const skyRotationInput = document.getElementById("sky-rotation");
-const skyRotationValue = document.getElementById("sky-rotation-value");
+const timeOfDayInput = document.getElementById("time-of-day");
+const timeOfDayValue = document.getElementById("time-of-day-value");
+const seasonDayInput = document.getElementById("season-day");
+const seasonDayValue = document.getElementById("season-day-value");
 const fieldBrightnessInput = document.getElementById("field-brightness");
 const fieldBrightnessValue = document.getElementById("field-brightness-value");
 const foregroundSizeInput = document.getElementById("foreground-size");
@@ -521,6 +523,8 @@ const projectionMetadata = {
 const fieldStars = generateFieldStars(560);
 const allStars = [...fieldStars, ...stars];
 const MAX_ZOOM = 12;
+const currentDate = new Date();
+const currentSeasonYear = currentDate.getFullYear();
 
 const state = {
   centerRa: 6,
@@ -532,13 +536,14 @@ const state = {
   pointerX: 0,
   pointerY: 0,
   hoverStar: starMap.get("polaris"),
-  projection: "equirectangular",
-  constellationDetail: "major",
+  projection: "stereographic",
+  constellationDetail: "full",
   asterismVisibility: "on",
   deepSkyVisibility: "popular",
-  coordinateSystem: "equatorial",
-  observerLatitude: 40,
-  skyRotationHours: 0,
+  coordinateSystem: "horizontal",
+  observerLatitude: 42,
+  timeOfDayHours: 22,
+  seasonDay: getDayOfYear(currentDate),
   fieldStarBrightness: 1.6,
   foregroundStarScale: 0.7
 };
@@ -571,6 +576,16 @@ function resizeCanvas() {
 
 function wrapHours(hours) {
   return ((hours % 24) + 24) % 24;
+}
+
+function getDaysInYear(year) {
+  return new Date(year, 1, 29).getMonth() === 1 ? 366 : 365;
+}
+
+function getDayOfYear(date) {
+  const start = new Date(date.getFullYear(), 0, 0);
+  const diff = date - start;
+  return Math.floor(diff / 86400000);
 }
 
 function clamp(value, min, max) {
@@ -610,9 +625,16 @@ function getSkyCoordinates(ra, dec) {
   return equatorialToHorizontal(ra, dec);
 }
 
+function getSeasonOffsetHours() {
+  const daysInYear = getDaysInYear(currentSeasonYear);
+  const vernalEquinoxDay = clamp(Math.round((79 / 365) * daysInYear), 1, daysInYear);
+  return ((state.seasonDay - vernalEquinoxDay) / daysInYear) * 24;
+}
+
 function equatorialToHorizontal(ra, dec) {
   const latitude = (state.observerLatitude * Math.PI) / 180;
-  const hourAngle = ((state.skyRotationHours - ra) * Math.PI) / 12;
+  const localSkyHours = wrapHours(state.timeOfDayHours + getSeasonOffsetHours());
+  const hourAngle = ((localSkyHours - ra) * Math.PI) / 12;
   const declination = (dec * Math.PI) / 180;
   const sinDeclination = Math.sin(declination);
   const cosDeclination = Math.cos(declination);
@@ -1104,8 +1126,24 @@ function drawBackdrop() {
   }
 }
 
-function formatRotationHours(hours) {
-  return `${hours >= 0 ? "+" : ""}${hours.toFixed(1)}h`;
+function formatTimeOfDay(hours) {
+  const wrapped = wrapHours(hours);
+  let wholeHours = Math.floor(wrapped);
+  const minutes = Math.round((wrapped - wholeHours) * 60);
+
+  if (minutes === 60) {
+    wholeHours = (wholeHours + 1) % 24;
+  }
+
+  const displayMinutes = minutes === 60 ? 0 : minutes;
+  const meridiem = wholeHours >= 12 ? "PM" : "AM";
+  const hour12 = wholeHours % 12 || 12;
+  return `${hour12}:${String(displayMinutes).padStart(2, "0")} ${meridiem}`;
+}
+
+function formatSeasonDay(day) {
+  const date = new Date(currentSeasonYear, 0, clamp(Math.round(day), 1, getDaysInYear(currentSeasonYear)));
+  return date.toLocaleDateString(undefined, { month: "short", day: "numeric" });
 }
 
 function draw() {
@@ -1285,9 +1323,16 @@ observerLatitudeInput.addEventListener("input", (event) => {
   draw();
 });
 
-skyRotationInput.addEventListener("input", (event) => {
-  state.skyRotationHours = Number(event.target.value);
-  skyRotationValue.textContent = formatRotationHours(state.skyRotationHours);
+timeOfDayInput.addEventListener("input", (event) => {
+  state.timeOfDayHours = Number(event.target.value);
+  timeOfDayValue.textContent = formatTimeOfDay(state.timeOfDayHours);
+  updateInfoCard(state.hoverStar);
+  draw();
+});
+
+seasonDayInput.addEventListener("input", (event) => {
+  state.seasonDay = clamp(Number(event.target.value) || 1, 1, getDaysInYear(currentSeasonYear));
+  seasonDayValue.textContent = formatSeasonDay(state.seasonDay);
   updateInfoCard(state.hoverStar);
   draw();
 });
@@ -1308,12 +1353,17 @@ window.addEventListener("resize", resizeCanvas);
 
 updateInfoCard(state.hoverStar);
 projectionDescription.textContent = projectionMetadata[state.projection].label;
+projectionSelect.value = state.projection;
 constellationDetailSelect.value = state.constellationDetail;
 asterismVisibilitySelect.value = state.asterismVisibility;
 deepSkyVisibilitySelect.value = state.deepSkyVisibility;
 coordinateSystemSelect.value = state.coordinateSystem;
 observerLatitudeInput.value = state.observerLatitude.toFixed(1);
-skyRotationValue.textContent = formatRotationHours(state.skyRotationHours);
+seasonDayInput.max = String(getDaysInYear(currentSeasonYear));
+seasonDayInput.value = String(state.seasonDay);
+timeOfDayInput.value = String(state.timeOfDayHours);
+timeOfDayValue.textContent = formatTimeOfDay(state.timeOfDayHours);
+seasonDayValue.textContent = formatSeasonDay(state.seasonDay);
 fieldBrightnessValue.textContent = `${fieldBrightnessInput.value}%`;
 foregroundSizeValue.textContent = `${foregroundSizeInput.value}%`;
 resizeCanvas();

@@ -176,16 +176,18 @@ h1 {
 
 #field-brightness,
 #foreground-size,
-#sky-rotation {
+#time-of-day,
+#season-day {
   width: min(320px, 100%);
   accent-color: #9fd0ff;
 }
 
 .slider-value {
-  min-width: 48px;
+  min-width: 72px;
   font-family: "Space Mono", monospace;
   font-size: 0.84rem;
   color: var(--text);
+  text-align: right;
 }
 
 .toolbar-value,
@@ -310,7 +312,8 @@ h1 {
 
   #field-brightness,
   #foreground-size,
-  #sky-rotation {
+  #time-of-day,
+  #season-day {
     width: 100%;
   }
 
@@ -319,7 +322,7 @@ h1 {
   }
 
   .slider-value {
-    min-width: 42px;
+    min-width: 72px;
     font-size: 0.75rem;
   }
 

@@ -48,7 +48,7 @@
             <span class="toolbar-label">Coordinate system</span>
             <select id="coordinate-system" aria-label="Choose the coordinate system">
               <option value="equatorial">Equatorial (RA/Dec)</option>
-              <option value="horizontal">Local horizon</option>
+              <option value="horizontal" selected>Local horizon</option>
             </select>
           </label>
 
@@ -57,7 +57,7 @@
             <select id="projection-select" aria-label="Choose the sky projection">
               <option value="equirectangular">Equirectangular</option>
               <option value="orthographic">Orthographic</option>
-              <option value="stereographic">Stereographic</option>
+              <option value="stereographic" selected>Stereographic</option>
             </select>
           </label>
 
@@ -65,7 +65,7 @@
             <span class="toolbar-label">Constellation lines</span>
             <select id="constellation-detail" aria-label="Choose constellation line detail">
               <option value="major">Major lines</option>
-              <option value="full">More complete lines</option>
+              <option value="full" selected>More complete lines</option>
             </select>
           </label>
 
@@ -73,7 +73,7 @@
             <span class="toolbar-label">Asterisms</span>
             <select id="asterism-visibility" aria-label="Choose asterism visibility">
               <option value="off">Off</option>
-              <option value="on">Show famous asterisms</option>
+              <option value="on" selected>Show famous asterisms</option>
             </select>
           </label>
 
@@ -93,24 +93,40 @@
               min="-90"
               max="90"
               step="0.1"
-              value="40.0"
+              value="42.0"
               aria-label="Observer latitude in degrees"
             />
           </label>
 
-          <label class="projection-select-wrap slider-wrap" for="sky-rotation">
-            <span class="toolbar-label">Time / seasonal rotation</span>
+          <label class="projection-select-wrap slider-wrap" for="time-of-day">
+            <span class="toolbar-label">Time</span>
             <div class="slider-row">
               <input
-                id="sky-rotation"
+                id="time-of-day"
                 type="range"
-                min="-12"
-                max="12"
-                value="0"
-                step="0.1"
-                aria-label="Adjust sky rotation around the polar axis"
+                min="0"
+                max="24"
+                value="22"
+                step="0.25"
+                aria-label="Adjust local time of day"
               />
-              <span class="slider-value" id="sky-rotation-value">+0.0h</span>
+              <span class="slider-value" id="time-of-day-value">10:00 PM</span>
+            </div>
+          </label>
+
+          <label class="projection-select-wrap slider-wrap" for="season-day">
+            <span class="toolbar-label">Season</span>
+            <div class="slider-row">
+              <input
+                id="season-day"
+                type="range"
+                min="1"
+                max="366"
+                value="87"
+                step="1"
+                aria-label="Adjust date through the year"
+              />
+              <span class="slider-value" id="season-day-value">Mar 28</span>
             </div>
           </label>
 
