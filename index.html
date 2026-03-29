@@ -41,11 +41,9 @@
           </div>
         </div>
 
-        <button class="mobile-controls-toggle" id="mobile-controls-toggle" type="button" aria-expanded="false" aria-controls="projection-controls">
-          Controls
-        </button>
-
-        <div class="projection-controls" id="projection-controls">
+        <details class="mobile-controls-shell" id="mobile-controls-shell">
+          <summary class="mobile-controls-toggle">Controls</summary>
+          <div class="projection-controls" id="projection-controls">
           <label class="projection-select-wrap" for="coordinate-system">
             <span class="toolbar-label">Coordinate system</span>
             <select id="coordinate-system" aria-label="Choose the coordinate system">
@@ -147,7 +145,8 @@
               <span class="slider-value" id="foreground-size-value">70%</span>
             </div>
           </label>
-        </div>
+          </div>
+        </details>
 
         <div class="viewer-frame">
           <canvas id="star-map" aria-label="Interactive map of stars and constellations"></canvas>

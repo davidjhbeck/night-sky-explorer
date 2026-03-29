@@ -97,8 +97,13 @@ h1 {
   background: linear-gradient(180deg, rgba(255, 255, 255, 0.03), transparent);
 }
 
+.mobile-controls-shell {
+  display: block;
+}
+
 .mobile-controls-toggle {
   display: none;
+  list-style: none;
   width: calc(100% - 40px);
   margin: 14px 20px 0;
   padding: 11px 14px;
@@ -108,6 +113,11 @@ h1 {
   color: var(--text);
   font: inherit;
   text-align: left;
+  cursor: pointer;
+}
+
+.mobile-controls-toggle::-webkit-details-marker {
+  display: none;
 }
 
 .projection-controls {
@@ -252,14 +262,13 @@ h1 {
     margin: 10px 14px 0;
   }
 
-  .projection-controls {
+  .mobile-controls-shell:not([open]) .projection-controls {
     display: none;
-    padding: 12px 14px 0;
-    gap: 12px;
   }
 
-  .projection-controls.mobile-open {
-    display: flex;
+  .projection-controls {
+    padding: 12px 14px 0;
+    gap: 12px;
   }
 
   .projection-select-wrap {
