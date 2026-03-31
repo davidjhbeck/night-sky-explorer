@@ -939,6 +939,10 @@ const deepSkyObjects = [
   { id: "m55", name: "M55", type: "cluster", ra: 19.67, dec: -30.97, mag: 6.3 }
 ];
 
+const atlasData = window.ATLAS_DATA || { constellations: [], asterisms: [], outlineStars: [] };
+const atlasConstellations = atlasData.constellations || [];
+const atlasAsterisms = atlasData.asterisms || [];
+const atlasOutlineStars = dedupeAtlasOutlineStars(atlasData.outlineStars || [], stars);
 const starMap = new Map(stars.map((star) => [star.id, star]));
 const canvas = document.getElementById("star-map");
 const ctx = canvas.getContext("2d");
@@ -996,7 +1000,7 @@ const projectionMetadata = {
 };
 
 const fieldStars = generateFieldStars(3200);
-const allStars = [...fieldStars, ...stars];
+const allStars = [...fieldStars, ...atlasOutlineStars, ...stars];
 const MAX_ZOOM = 12;
 const currentDate = new Date();
 const currentSeasonYear = currentDate.getFullYear();
@@ -1190,6 +1194,10 @@ function raDifference(ra, centerRa) {
 function raDecToScreen(ra, dec, offsetWrap = 0) {
   const { lon, lat } = getSkyCoordinates(ra, dec);
   return lonLatToScreen(lon, lat, offsetWrap);
+}
+
+function equatorialDegreesToScreen(longitude, latitude, offsetWrap = 0) {
+  return raDecToScreen(wrapHours(longitude / 15), latitude, offsetWrap);
 }
 
 function getSkyCoordinates(ra, dec) {
@@ -1632,6 +1640,16 @@ function generateFieldStars(count) {
   }
 
   return generated;
+}
+
+function starsAreEquivalent(first, second) {
+  return Math.abs((first.ra - second.ra) * 15) < 0.18 && Math.abs(first.dec - second.dec) < 0.18;
+}
+
+function dedupeAtlasOutlineStars(extraStars, existingStars) {
+  return extraStars.filter(
+    (candidate) => !existingStars.some((existing) => starsAreEquivalent(existing, candidate))
+  );
 }
 
 function galacticToEquatorial(longitude, latitude) {
@@ -2155,6 +2173,11 @@ function drawConstellations() {
     return;
   }
 
+  if (state.constellationDetail === "full" && atlasConstellations.length) {
+    drawAtlasConstellations();
+    return;
+  }
+
   ctx.save();
 
   for (const constellation of constellations) {
@@ -2180,6 +2203,11 @@ function drawConstellations() {
 
 function drawAsterisms() {
   if (state.asterismVisibility === "off" || !labelsAreVisible()) {
+    return;
+  }
+
+  if (state.constellationDetail === "full" && atlasAsterisms.length) {
+    drawAtlasAsterisms();
     return;
   }
 
@@ -2234,6 +2262,103 @@ function drawConstellationSegments(segments, wrapOffset, lineWidth, strokeStyle)
     ctx.moveTo(startPoint.x, startPoint.y);
     ctx.lineTo(endPoint.x, endPoint.y);
     ctx.stroke();
+  }
+
+  ctx.restore();
+}
+
+function drawAtlasPolylineSet(lines, wrapOffset, lineWidth, strokeStyle) {
+  ctx.save();
+  ctx.lineWidth = lineWidth;
+  ctx.strokeStyle = strokeStyle;
+
+  for (const line of lines) {
+    let hasSegment = false;
+    ctx.beginPath();
+
+    for (const [longitude, latitude] of line) {
+      const point = equatorialDegreesToScreen(longitude, latitude, wrapOffset);
+      if (!point) {
+        hasSegment = false;
+        continue;
+      }
+
+      if (!hasSegment) {
+        ctx.moveTo(point.x, point.y);
+        hasSegment = true;
+      } else {
+        ctx.lineTo(point.x, point.y);
+      }
+    }
+
+    if (hasSegment) {
+      ctx.stroke();
+    }
+  }
+
+  ctx.restore();
+}
+
+function drawAtlasConstellations() {
+  ctx.save();
+  ctx.fillStyle = "rgba(159, 208, 255, 0.78)";
+  ctx.font = '13px "Space Mono", monospace';
+
+  const wrapOffsets = projectionMetadata[state.projection].drawWrapCopies ? [-360, 0, 360] : [0];
+  for (const constellation of atlasConstellations) {
+    for (const wrapOffset of wrapOffsets) {
+      drawAtlasPolylineSet(constellation.lines, wrapOffset, 1.22, "rgba(159, 208, 255, 0.42)");
+
+      const labelPoint = equatorialDegreesToScreen(
+        constellation.labelLon,
+        constellation.labelLat,
+        wrapOffset
+      );
+      if (labelPoint && labelPoint.x > -120 && labelPoint.x < canvas.clientWidth + 120) {
+        ctx.fillText(constellation.name, labelPoint.x + 8, labelPoint.y - 8);
+      }
+    }
+  }
+
+  ctx.restore();
+}
+
+function drawAtlasAsterisms() {
+  ctx.save();
+  ctx.fillStyle = "rgba(238, 224, 161, 0.42)";
+  ctx.font = '12px "Space Mono", monospace';
+
+  const atlasNames = new Set(atlasAsterisms.map((asterism) => asterism.name));
+  const wrapOffsets = projectionMetadata[state.projection].drawWrapCopies ? [-360, 0, 360] : [0];
+
+  for (const asterism of atlasAsterisms) {
+    for (const wrapOffset of wrapOffsets) {
+      drawAtlasPolylineSet(asterism.lines, wrapOffset, 1.05, "rgba(238, 224, 161, 0.24)");
+      if (useFullLabels()) {
+        const labelPoint = equatorialDegreesToScreen(asterism.labelLon, asterism.labelLat, wrapOffset);
+        if (labelPoint && labelPoint.x > -120 && labelPoint.x < canvas.clientWidth + 120) {
+          ctx.fillText(asterism.name, labelPoint.x + 6, labelPoint.y - 10);
+        }
+      }
+    }
+  }
+
+  for (const asterism of asterisms) {
+    if (atlasNames.has(asterism.name)) {
+      continue;
+    }
+    for (const wrapOffset of wrapOffsets) {
+      drawConstellationSegments(asterism.segments, wrapOffset, 1, "rgba(238, 224, 161, 0.18)");
+      if (asterism.extraSegments?.length) {
+        drawConstellationSegments(asterism.extraSegments, wrapOffset, 1.15, "rgba(238, 224, 161, 0.24)");
+      }
+      if (useFullLabels()) {
+        const labelPoint = raDecToScreen(asterism.labelRa, asterism.labelDec, wrapOffset);
+        if (labelPoint && labelPoint.x > -120 && labelPoint.x < canvas.clientWidth + 120) {
+          ctx.fillText(asterism.name, labelPoint.x + 6, labelPoint.y - 10);
+        }
+      }
+    }
   }
 
   ctx.restore();
