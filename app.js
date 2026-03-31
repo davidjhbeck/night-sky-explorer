@@ -561,10 +561,10 @@ const observerLongitudeValue = document.getElementById("observer-longitude-value
 const timeOfDayStatus = document.getElementById("time-of-day-status");
 const useCurrentLocationButton = document.getElementById("use-current-location");
 const useCurrentDatetimeButton = document.getElementById("use-current-datetime");
-const fieldBrightnessInput = document.getElementById("field-brightness");
-const fieldBrightnessValue = document.getElementById("field-brightness-value");
-const foregroundSizeInput = document.getElementById("foreground-size");
-const foregroundSizeValue = document.getElementById("foreground-size-value");
+const starBrightnessInput = document.getElementById("star-brightness");
+const starBrightnessValue = document.getElementById("star-brightness-value");
+const starSizeInput = document.getElementById("star-size");
+const starSizeValue = document.getElementById("star-size-value");
 const milkyWayBrightnessInput = document.getElementById("milky-way-brightness");
 const milkyWayBrightnessValue = document.getElementById("milky-way-brightness-value");
 
@@ -624,8 +624,8 @@ const state = {
   observerLongitude: -83,
   timeOfDayHours: 22,
   seasonDay: getDayOfYear(currentDate),
-  fieldStarBrightness: 1.6,
-  foregroundStarScale: 0.35,
+  starBrightnessScale: 1.6,
+  starSizeScale: 0.35,
   milkyWayBrightness: 0.28
 };
 
@@ -1851,13 +1851,9 @@ function drawStars() {
       }
 
       const baseRadius = magnitudeRadius(star.mag) * Math.sqrt(state.zoom);
-      const radius = star.isFieldStar
-        ? Math.max(0.28, baseRadius * (0.32 + state.fieldStarBrightness * 0.22))
-        : baseRadius * state.foregroundStarScale;
+      const radius = Math.max(0.28, baseRadius * state.starSizeScale);
       const isHovered = state.hoverStar?.id === star.id && wrapOffset === 0;
-      const opacity = star.isFieldStar
-        ? clamp(starOpacity(star.mag) * (0.38 + state.fieldStarBrightness * 0.78), 0.05, 0.98)
-        : starOpacity(star.mag);
+      const opacity = clamp(starOpacity(star.mag) * state.starBrightnessScale, 0.05, 0.98);
       ctx.beginPath();
       ctx.fillStyle = isHovered
         ? "rgba(255, 223, 153, 0.98)"
@@ -2331,15 +2327,15 @@ deepSkyVisibilitySelect.addEventListener("click", () => {
   draw();
 });
 
-fieldBrightnessInput.addEventListener("input", (event) => {
-  state.fieldStarBrightness = Number(event.target.value) / 100;
-  fieldBrightnessValue.textContent = `${event.target.value}%`;
+starBrightnessInput.addEventListener("input", (event) => {
+  state.starBrightnessScale = Number(event.target.value) / 100;
+  starBrightnessValue.textContent = `${event.target.value}%`;
   draw();
 });
 
-foregroundSizeInput.addEventListener("input", (event) => {
-  state.foregroundStarScale = (Number(event.target.value) / 100) * 0.35;
-  foregroundSizeValue.textContent = `${event.target.value}%`;
+starSizeInput.addEventListener("input", (event) => {
+  state.starSizeScale = (Number(event.target.value) / 100) * 0.35;
+  starSizeValue.textContent = `${event.target.value}%`;
   draw();
 });
 
@@ -2630,7 +2626,7 @@ updateLatitudeUI();
 updateLongitudeUI();
 updateTimeWheel();
 updateShortcutButtons();
-fieldBrightnessValue.textContent = `${fieldBrightnessInput.value}%`;
-foregroundSizeValue.textContent = `${foregroundSizeInput.value}%`;
+starBrightnessValue.textContent = `${starBrightnessInput.value}%`;
+starSizeValue.textContent = `${starSizeInput.value}%`;
 milkyWayBrightnessValue.textContent = `${milkyWayBrightnessInput.value}%`;
 resizeCanvas();

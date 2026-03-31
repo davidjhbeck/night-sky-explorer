@@ -254,8 +254,8 @@ h1 {
   gap: 14px;
 }
 
-#field-brightness,
-#foreground-size,
+#star-brightness,
+#star-size,
 #milky-way-brightness {
   width: min(320px, 100%);
   accent-color: #9fd0ff;
@@ -657,8 +657,8 @@ h1 {
     font-size: 0.94rem;
   }
 
-  #field-brightness,
-  #foreground-size,
+  #star-brightness,
+  #star-size,
   #milky-way-brightness {
     width: 100%;
   }
