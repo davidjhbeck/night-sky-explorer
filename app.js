@@ -37,6 +37,11 @@ const stars = [
   { id: "taygeta", name: "Taygeta", constellation: "Taurus", ra: 3.75, dec: 24.47, mag: 4.29 },
   { id: "pleione", name: "Pleione", constellation: "Taurus", ra: 3.82, dec: 24.14, mag: 5.05 },
   { id: "celaeno", name: "Celaeno", constellation: "Taurus", ra: 3.74, dec: 24.29, mag: 5.45 },
+  { id: "asterope", name: "Asterope", constellation: "Taurus", ra: 3.76, dec: 24.37, mag: 5.76 },
+  { id: "ain", name: "Ain", constellation: "Taurus", ra: 4.48, dec: 19.18, mag: 3.53 },
+  { id: "hyadum-i", name: "Hyadum I", constellation: "Taurus", ra: 4.33, dec: 15.63, mag: 3.65 },
+  { id: "hyadum-ii", name: "Hyadum II", constellation: "Taurus", ra: 4.38, dec: 17.54, mag: 3.77 },
+  { id: "theta2-tau", name: "Theta2 Tauri", constellation: "Taurus", ra: 4.48, dec: 15.96, mag: 3.4 },
   { id: "capella", name: "Capella", constellation: "Auriga", ra: 5.28, dec: 46.0, mag: 0.08 },
   { id: "menkalinan", name: "Menkalinan", constellation: "Auriga", ra: 5.99, dec: 44.95, mag: 1.9 },
   { id: "almach", name: "Almach", constellation: "Andromeda", ra: 2.07, dec: 42.33, mag: 2.1 },
@@ -584,7 +589,7 @@ const projectionMetadata = {
   }
 };
 
-const fieldStars = generateFieldStars(2200);
+const fieldStars = generateFieldStars(3200);
 const allStars = [...fieldStars, ...stars];
 const MAX_ZOOM = 12;
 const currentDate = new Date();
@@ -1200,8 +1205,17 @@ function generateFieldStars(count) {
     const seed = index + 1;
     const ra = seededRandom(seed * 1.37) * 24;
     const dec = Math.asin(seededRandom(seed * 2.11) * 2 - 1) * (180 / Math.PI);
-    const magBias = Math.pow(seededRandom(seed * 3.73), 0.42);
-    const mag = 3.4 + magBias * 2.3;
+    const branch = seededRandom(seed * 3.73);
+    let mag;
+
+    if (branch < 0.05) {
+      mag = 1.4 + Math.pow(seededRandom(seed * 4.19), 1.15) * 1.8;
+    } else if (branch < 0.26) {
+      mag = 2.6 + Math.pow(seededRandom(seed * 4.71), 0.88) * 1.8;
+    } else {
+      mag = 3.8 + Math.pow(seededRandom(seed * 5.23), 0.58) * 2.8;
+    }
+
     generated.push({
       id: `field-${seed}`,
       ra,
@@ -1838,11 +1852,11 @@ function drawStars() {
 
       const baseRadius = magnitudeRadius(star.mag) * Math.sqrt(state.zoom);
       const radius = star.isFieldStar
-        ? Math.max(0.35, baseRadius * (0.42 + state.fieldStarBrightness * 0.1))
+        ? Math.max(0.28, baseRadius * (0.32 + state.fieldStarBrightness * 0.22))
         : baseRadius * state.foregroundStarScale;
       const isHovered = state.hoverStar?.id === star.id && wrapOffset === 0;
       const opacity = star.isFieldStar
-        ? clamp(starOpacity(star.mag) * state.fieldStarBrightness, 0.08, 0.98)
+        ? clamp(starOpacity(star.mag) * (0.38 + state.fieldStarBrightness * 0.78), 0.05, 0.98)
         : starOpacity(star.mag);
       ctx.beginPath();
       ctx.fillStyle = isHovered
