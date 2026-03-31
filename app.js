@@ -49,6 +49,9 @@ const stars = [
   { id: "mirach", name: "Mirach", constellation: "Andromeda", ra: 1.16, dec: 35.62, mag: 2.05 },
   { id: "castor", name: "Castor", constellation: "Gemini", ra: 7.58, dec: 31.89, mag: 1.58 },
   { id: "pollux", name: "Pollux", constellation: "Gemini", ra: 7.76, dec: 28.03, mag: 1.14 },
+  { id: "mebsuta", name: "Mebsuta", constellation: "Gemini", ra: 6.73, dec: 25.13, mag: 3.06 },
+  { id: "wasat", name: "Wasat", constellation: "Gemini", ra: 7.34, dec: 21.98, mag: 3.53 },
+  { id: "tejat", name: "Tejat", constellation: "Gemini", ra: 6.38, dec: 22.51, mag: 2.87 },
   { id: "alhena", name: "Alhena", constellation: "Gemini", ra: 6.63, dec: 16.4, mag: 1.93 },
   { id: "procyon", name: "Procyon", constellation: "Canis Minor", ra: 7.66, dec: 5.22, mag: 0.34 },
   { id: "sirius", name: "Sirius", constellation: "Canis Major", ra: 6.75, dec: -16.72, mag: -1.46 },
@@ -82,6 +85,7 @@ const stars = [
   { id: "cor-caroli", name: "Cor Caroli", constellation: "Canes Venatici", ra: 12.93, dec: 38.32, mag: 2.89 },
   { id: "rasalhague", name: "Rasalhague", constellation: "Ophiuchus", ra: 17.58, dec: 12.56, mag: 2.08 },
   { id: "vega", name: "Vega", constellation: "Lyra", ra: 18.62, dec: 38.78, mag: 0.03 },
+  { id: "alshain", name: "Alshain", constellation: "Aquila", ra: 19.92, dec: 6.41, mag: 3.71 },
   { id: "altair", name: "Altair", constellation: "Aquila", ra: 19.85, dec: 8.87, mag: 0.77 },
   { id: "tarazed", name: "Tarazed", constellation: "Aquila", ra: 19.77, dec: 10.61, mag: 2.72 },
   { id: "sadalmelik", name: "Sadalmelik", constellation: "Aquarius", ra: 22.1, dec: -0.32, mag: 2.95 },
@@ -168,11 +172,15 @@ const constellations = [
     labelDec: 20.5,
     segments: [
       ["aldebaran", "elnath"],
-      ["aldebaran", "betelgeuse"]
+      ["aldebaran", "ain"],
+      ["ain", "hyadum-i"],
+      ["hyadum-i", "hyadum-ii"]
     ],
     extraSegments: [
-      ["elnath", "capella"],
-      ["aldebaran", "capella"]
+      ["hyadum-ii", "theta2-tau"],
+      ["theta2-tau", "elnath"],
+      ["ain", "theta2-tau"],
+      ["elnath", "capella"]
     ]
   },
   {
@@ -181,11 +189,16 @@ const constellations = [
     labelDec: 29.6,
     segments: [
       ["castor", "pollux"],
-      ["pollux", "procyon"]
+      ["castor", "mebsuta"],
+      ["pollux", "wasat"],
+      ["mebsuta", "wasat"],
+      ["wasat", "alhena"]
     ],
     extraSegments: [
-      ["castor", "alhena"],
-      ["pollux", "alhena"]
+      ["pollux", "tejat"],
+      ["tejat", "alhena"],
+      ["mebsuta", "tejat"],
+      ["castor", "wasat"]
     ]
   },
   {
@@ -260,6 +273,7 @@ const constellations = [
       ["zosma", "denebola"]
     ],
     extraSegments: [
+      ["regulus", "denebola"],
       ["regulus", "zosma"],
       ["algieba", "denebola"]
     ]
@@ -297,7 +311,8 @@ const constellations = [
       ["mirach", "almach"]
     ],
     extraSegments: [
-      ["alpheratz", "almach"]
+      ["alpheratz", "almach"],
+      ["mirfak", "mirach"]
     ]
   },
   {
@@ -321,10 +336,13 @@ const constellations = [
     labelDec: 9.5,
     segments: [
       ["altair", "tarazed"],
+      ["altair", "alshain"],
       ["tarazed", "rasalhague"]
     ],
     extraSegments: [
-      ["altair", "rasalhague"]
+      ["alshain", "rasalhague"],
+      ["altair", "rasalhague"],
+      ["tarazed", "alshain"]
     ]
   },
   {
@@ -336,7 +354,9 @@ const constellations = [
       ["vega", "sulafat"]
     ],
     extraSegments: [
-      ["sheliak", "sulafat"]
+      ["sheliak", "sulafat"],
+      ["vega", "sheliak"],
+      ["vega", "sulafat"]
     ]
   },
   {
@@ -348,7 +368,8 @@ const constellations = [
       ["mirfak", "almach"]
     ],
     extraSegments: [
-      ["algol", "almach"]
+      ["algol", "almach"],
+      ["mirfak", "capella"]
     ]
   }
 ];
