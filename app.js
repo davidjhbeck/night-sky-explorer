@@ -44,6 +44,8 @@ const stars = [
   { id: "theta2-tau", name: "Theta2 Tauri", constellation: "Taurus", ra: 4.48, dec: 15.96, mag: 3.4 },
   { id: "capella", name: "Capella", constellation: "Auriga", ra: 5.28, dec: 46.0, mag: 0.08 },
   { id: "menkalinan", name: "Menkalinan", constellation: "Auriga", ra: 5.99, dec: 44.95, mag: 1.9 },
+  { id: "almaaz", name: "Almaaz", constellation: "Auriga", ra: 5.03, dec: 43.82, mag: 2.69 },
+  { id: "hassaleh", name: "Hassaleh", constellation: "Auriga", ra: 4.95, dec: 33.17, mag: 2.65 },
   { id: "almach", name: "Almach", constellation: "Andromeda", ra: 2.07, dec: 42.33, mag: 2.1 },
   { id: "alpheratz", name: "Alpheratz", constellation: "Andromeda", ra: 0.14, dec: 29.09, mag: 2.07 },
   { id: "mirach", name: "Mirach", constellation: "Andromeda", ra: 1.16, dec: 35.62, mag: 2.05 },
@@ -53,7 +55,12 @@ const stars = [
   { id: "wasat", name: "Wasat", constellation: "Gemini", ra: 7.34, dec: 21.98, mag: 3.53 },
   { id: "tejat", name: "Tejat", constellation: "Gemini", ra: 6.38, dec: 22.51, mag: 2.87 },
   { id: "alhena", name: "Alhena", constellation: "Gemini", ra: 6.63, dec: 16.4, mag: 1.93 },
+  { id: "acubens", name: "Acubens", constellation: "Cancer", ra: 8.98, dec: 11.86, mag: 4.25 },
+  { id: "altarf", name: "Altarf", constellation: "Cancer", ra: 8.28, dec: 9.19, mag: 3.52 },
+  { id: "asellus-borealis", name: "Asellus Borealis", constellation: "Cancer", ra: 8.72, dec: 21.47, mag: 4.66 },
+  { id: "asellus-australis", name: "Asellus Australis", constellation: "Cancer", ra: 8.74, dec: 18.15, mag: 3.94 },
   { id: "procyon", name: "Procyon", constellation: "Canis Minor", ra: 7.66, dec: 5.22, mag: 0.34 },
+  { id: "gomeisa", name: "Gomeisa", constellation: "Canis Minor", ra: 7.45, dec: 8.29, mag: 2.89 },
   { id: "sirius", name: "Sirius", constellation: "Canis Major", ra: 6.75, dec: -16.72, mag: -1.46 },
   { id: "mirzam", name: "Mirzam", constellation: "Canis Major", ra: 6.38, dec: -17.96, mag: 1.98 },
   { id: "wezen", name: "Wezen", constellation: "Canis Major", ra: 7.14, dec: -26.39, mag: 1.83 },
@@ -61,6 +68,14 @@ const stars = [
   { id: "aludra", name: "Aludra", constellation: "Canis Major", ra: 7.4, dec: -29.3, mag: 2.45 },
   { id: "canopus", name: "Canopus", constellation: "Carina", ra: 6.4, dec: -52.7, mag: -0.74 },
   { id: "miaplacidus", name: "Miaplacidus", constellation: "Carina", ra: 9.22, dec: -69.72, mag: 1.67 },
+  { id: "avior", name: "Avior", constellation: "Carina", ra: 8.38, dec: -59.51, mag: 1.86 },
+  { id: "aspidiske", name: "Aspidiske", constellation: "Carina", ra: 9.28, dec: -59.28, mag: 2.21 },
+  { id: "regor", name: "Regor", constellation: "Vela", ra: 8.16, dec: -47.34, mag: 1.75 },
+  { id: "suhail", name: "Suhail", constellation: "Vela", ra: 9.13, dec: -43.43, mag: 2.23 },
+  { id: "markeb-vela", name: "Markeb", constellation: "Vela", ra: 9.37, dec: -55.01, mag: 2.47 },
+  { id: "naos", name: "Naos", constellation: "Puppis", ra: 8.06, dec: -40.0, mag: 2.25 },
+  { id: "tureis", name: "Tureis", constellation: "Puppis", ra: 7.95, dec: -24.3, mag: 2.82 },
+  { id: "azmidi", name: "Azmidi", constellation: "Puppis", ra: 7.45, dec: -25.84, mag: 2.21 },
   { id: "cyg-deneb", name: "Deneb", constellation: "Cygnus", ra: 20.69, dec: 45.28, mag: 1.25 },
   { id: "sadr", name: "Sadr", constellation: "Cygnus", ra: 20.37, dec: 40.26, mag: 2.23 },
   { id: "gienah", name: "Gienah", constellation: "Cygnus", ra: 20.77, dec: 33.97, mag: 2.47 },
@@ -68,7 +83,10 @@ const stars = [
   { id: "albireo", name: "Albireo", constellation: "Cygnus", ra: 19.51, dec: 27.96, mag: 3.18 },
   { id: "epsilon-cyg", name: "Epsilon Cygni", constellation: "Cygnus", ra: 20.77, dec: 33.97, mag: 2.48 },
   { id: "antares", name: "Antares", constellation: "Scorpius", ra: 16.49, dec: -26.43, mag: 1.06 },
+  { id: "acrabh", name: "Acrab", constellation: "Scorpius", ra: 16.09, dec: -19.81, mag: 2.62 },
+  { id: "jabbah", name: "Jabbah", constellation: "Scorpius", ra: 16.0, dec: -19.46, mag: 2.56 },
   { id: "shaula", name: "Shaula", constellation: "Scorpius", ra: 17.56, dec: -37.1, mag: 1.62 },
+  { id: "lesath", name: "Lesath", constellation: "Scorpius", ra: 17.51, dec: -37.3, mag: 2.7 },
   { id: "sargas", name: "Sargas", constellation: "Scorpius", ra: 17.62, dec: -42.99, mag: 1.86 },
   { id: "dschubba", name: "Dschubba", constellation: "Scorpius", ra: 16.01, dec: -22.62, mag: 2.29 },
   { id: "acrux", name: "Acrux", constellation: "Crux", ra: 12.44, dec: -63.1, mag: 0.77 },
@@ -77,18 +95,43 @@ const stars = [
   { id: "delta-crucis", name: "Imai", constellation: "Crux", ra: 12.25, dec: -58.75, mag: 2.79 },
   { id: "epsilon-crucis", name: "Ginan", constellation: "Crux", ra: 12.36, dec: -60.4, mag: 3.58 },
   { id: "regulus", name: "Regulus", constellation: "Leo", ra: 10.14, dec: 11.97, mag: 1.35 },
+  { id: "adhafera", name: "Adhafera", constellation: "Leo", ra: 10.28, dec: 23.42, mag: 3.33 },
   { id: "algieba", name: "Algieba", constellation: "Leo", ra: 10.33, dec: 19.84, mag: 2.01 },
+  { id: "rasalas", name: "Rasalas", constellation: "Leo", ra: 9.88, dec: 26.01, mag: 3.88 },
   { id: "zosma", name: "Zosma", constellation: "Leo", ra: 11.24, dec: 20.52, mag: 2.56 },
+  { id: "chertan", name: "Chertan", constellation: "Leo", ra: 11.24, dec: 15.43, mag: 3.34 },
   { id: "denebola", name: "Denebola", constellation: "Leo", ra: 11.82, dec: 14.57, mag: 2.14 },
   { id: "spica", name: "Spica", constellation: "Virgo", ra: 13.42, dec: -11.16, mag: 0.98 },
+  { id: "porrima", name: "Porrima", constellation: "Virgo", ra: 12.69, dec: -1.45, mag: 2.74 },
+  { id: "vindemiatrix", name: "Vindemiatrix", constellation: "Virgo", ra: 13.04, dec: 10.96, mag: 2.85 },
+  { id: "zavijava", name: "Zavijava", constellation: "Virgo", ra: 11.84, dec: 1.76, mag: 3.59 },
+  { id: "zubenelgenubi", name: "Zubenelgenubi", constellation: "Libra", ra: 14.85, dec: -16.04, mag: 2.75 },
+  { id: "zubeneschamali", name: "Zubeneschamali", constellation: "Libra", ra: 15.28, dec: -9.38, mag: 2.61 },
+  { id: "brachium", name: "Brachium", constellation: "Libra", ra: 15.07, dec: -25.28, mag: 3.25 },
+  { id: "upsilon-lib", name: "Upsilon Librae", constellation: "Libra", ra: 15.62, dec: -28.14, mag: 3.6 },
   { id: "arcturus", name: "Arcturus", constellation: "Bootes", ra: 14.26, dec: 19.18, mag: -0.05 },
+  { id: "izar", name: "Izar", constellation: "Bootes", ra: 14.75, dec: 27.08, mag: 2.35 },
+  { id: "nekkar", name: "Nekkar", constellation: "Bootes", ra: 15.03, dec: 40.39, mag: 3.61 },
+  { id: "seginus-bootes", name: "Seginus", constellation: "Bootes", ra: 14.53, dec: 38.31, mag: 3.04 },
   { id: "cor-caroli", name: "Cor Caroli", constellation: "Canes Venatici", ra: 12.93, dec: 38.32, mag: 2.89 },
   { id: "rasalhague", name: "Rasalhague", constellation: "Ophiuchus", ra: 17.58, dec: 12.56, mag: 2.08 },
+  { id: "cebalrai", name: "Cebalrai", constellation: "Ophiuchus", ra: 17.72, dec: 4.57, mag: 2.76 },
+  { id: "sabik", name: "Sabik", constellation: "Ophiuchus", ra: 17.17, dec: -15.72, mag: 2.43 },
+  { id: "yed-prior", name: "Yed Prior", constellation: "Ophiuchus", ra: 16.24, dec: -3.69, mag: 2.75 },
+  { id: "yed-posterior", name: "Yed Posterior", constellation: "Ophiuchus", ra: 16.31, dec: -4.69, mag: 3.23 },
+  { id: "ras-algethi", name: "Rasalgethi", constellation: "Hercules", ra: 17.24, dec: 14.39, mag: 3.48 },
+  { id: "pi-her", name: "Pi Herculis", constellation: "Hercules", ra: 17.25, dec: 36.81, mag: 3.16 },
+  { id: "eta-her", name: "Eta Herculis", constellation: "Hercules", ra: 16.71, dec: 38.92, mag: 3.48 },
+  { id: "zeta-her", name: "Zeta Herculis", constellation: "Hercules", ra: 16.69, dec: 31.6, mag: 2.81 },
+  { id: "epsilon-her", name: "Epsilon Herculis", constellation: "Hercules", ra: 17.0, dec: 30.93, mag: 3.92 },
   { id: "vega", name: "Vega", constellation: "Lyra", ra: 18.62, dec: 38.78, mag: 0.03 },
   { id: "alshain", name: "Alshain", constellation: "Aquila", ra: 19.92, dec: 6.41, mag: 3.71 },
   { id: "altair", name: "Altair", constellation: "Aquila", ra: 19.85, dec: 8.87, mag: 0.77 },
   { id: "tarazed", name: "Tarazed", constellation: "Aquila", ra: 19.77, dec: 10.61, mag: 2.72 },
   { id: "sadalmelik", name: "Sadalmelik", constellation: "Aquarius", ra: 22.1, dec: -0.32, mag: 2.95 },
+  { id: "sadalsuud", name: "Sadalsuud", constellation: "Aquarius", ra: 21.53, dec: -5.57, mag: 2.9 },
+  { id: "albali", name: "Albali", constellation: "Aquarius", ra: 20.79, dec: -9.5, mag: 3.77 },
+  { id: "skat", name: "Skat", constellation: "Aquarius", ra: 22.91, dec: -15.82, mag: 3.27 },
   { id: "fomalhaut", name: "Fomalhaut", constellation: "Piscis Austrinus", ra: 22.96, dec: -29.62, mag: 1.16 },
   { id: "markab", name: "Markab", constellation: "Pegasus", ra: 23.08, dec: 15.21, mag: 2.49 },
   { id: "scheat", name: "Scheat", constellation: "Pegasus", ra: 23.06, dec: 28.08, mag: 2.44 },
@@ -97,6 +140,8 @@ const stars = [
   { id: "sheliak", name: "Sheliak", constellation: "Lyra", ra: 18.83, dec: 33.36, mag: 3.52 },
   { id: "sulafat", name: "Sulafat", constellation: "Lyra", ra: 18.98, dec: 32.69, mag: 3.25 },
   { id: "hamal", name: "Hamal", constellation: "Aries", ra: 2.12, dec: 23.46, mag: 2.0 },
+  { id: "sheratan", name: "Sheratan", constellation: "Aries", ra: 1.91, dec: 20.81, mag: 2.64 },
+  { id: "mesarthim", name: "Mesarthim", constellation: "Aries", ra: 1.89, dec: 19.29, mag: 3.86 },
   { id: "nunki", name: "Nunki", constellation: "Sagittarius", ra: 18.92, dec: -26.3, mag: 2.05 },
   { id: "kaus-australis", name: "Kaus Australis", constellation: "Sagittarius", ra: 18.4, dec: -34.38, mag: 1.79 },
   { id: "kaus-media", name: "Kaus Media", constellation: "Sagittarius", ra: 18.35, dec: -29.83, mag: 2.72 },
@@ -106,6 +151,18 @@ const stars = [
   { id: "tau-sgr", name: "Tau Sagittarii", constellation: "Sagittarius", ra: 19.12, dec: -27.67, mag: 3.32 },
   { id: "psi-sgr", name: "Psi Sagittarii", constellation: "Sagittarius", ra: 19.26, dec: -25.42, mag: 4.85 },
   { id: "alnasl", name: "Alnasl", constellation: "Sagittarius", ra: 18.1, dec: -30.42, mag: 2.98 },
+  { id: "dabih", name: "Dabih", constellation: "Capricornus", ra: 20.35, dec: -14.78, mag: 3.05 },
+  { id: "algedi", name: "Algedi", constellation: "Capricornus", ra: 20.3, dec: -12.54, mag: 3.58 },
+  { id: "nashira", name: "Nashira", constellation: "Capricornus", ra: 21.67, dec: -16.66, mag: 3.69 },
+  { id: "deneb-algedi", name: "Deneb Algedi", constellation: "Capricornus", ra: 21.78, dec: -16.13, mag: 2.85 },
+  { id: "alrescha", name: "Alrescha", constellation: "Pisces", ra: 2.03, dec: 2.76, mag: 3.82 },
+  { id: "fumalsamakah", name: "Fumalsamakah", constellation: "Pisces", ra: 0.82, dec: 27.72, mag: 4.23 },
+  { id: "torcular", name: "Torcular", constellation: "Pisces", ra: 0.16, dec: 29.58, mag: 4.61 },
+  { id: "menkar", name: "Menkar", constellation: "Cetus", ra: 3.04, dec: 4.09, mag: 2.54 },
+  { id: "rigil-kentaurus", name: "Rigil Kentaurus", constellation: "Centaurus", ra: 14.66, dec: -60.83, mag: -0.27 },
+  { id: "hadar", name: "Hadar", constellation: "Centaurus", ra: 14.06, dec: -60.37, mag: 0.61 },
+  { id: "menkent", name: "Menkent", constellation: "Centaurus", ra: 14.11, dec: -36.37, mag: 2.06 },
+  { id: "epsilon-centauri", name: "Epsilon Centauri", constellation: "Centaurus", ra: 13.67, dec: -53.47, mag: 2.3 },
   { id: "deneb-kaitos", name: "Deneb Kaitos", constellation: "Cetus", ra: 0.73, dec: -17.99, mag: 2.04 },
   { id: "achernar", name: "Achernar", constellation: "Eridanus", ra: 1.63, dec: -57.24, mag: 0.46 }
 ];
@@ -237,13 +294,18 @@ const constellations = [
     labelRa: 16.9,
     labelDec: -30.2,
     segments: [
+      ["acrabh", "dschubba"],
       ["dschubba", "antares"],
       ["antares", "shaula"],
       ["shaula", "sargas"]
     ],
     extraSegments: [
+      ["jabbah", "acrabh"],
+      ["jabbah", "dschubba"],
       ["dschubba", "shaula"],
-      ["antares", "sargas"]
+      ["antares", "sargas"],
+      ["shaula", "lesath"],
+      ["lesath", "sargas"]
     ]
   },
   {
@@ -269,13 +331,18 @@ const constellations = [
     labelDec: 16.3,
     segments: [
       ["regulus", "algieba"],
+      ["algieba", "adhafera"],
+      ["adhafera", "rasalas"],
       ["algieba", "zosma"],
-      ["zosma", "denebola"]
+      ["zosma", "chertan"],
+      ["chertan", "denebola"]
     ],
     extraSegments: [
+      ["regulus", "rasalas"],
       ["regulus", "denebola"],
-      ["regulus", "zosma"],
-      ["algieba", "denebola"]
+      ["algieba", "rasalas"],
+      ["zosma", "denebola"],
+      ["regulus", "chertan"]
     ]
   },
   {
@@ -370,6 +437,263 @@ const constellations = [
     extraSegments: [
       ["algol", "almach"],
       ["mirfak", "capella"]
+    ]
+  },
+  {
+    name: "Hercules",
+    labelRa: 16.95,
+    labelDec: 31.8,
+    segments: [
+      ["eta-her", "pi-her"],
+      ["pi-her", "epsilon-her"],
+      ["epsilon-her", "zeta-her"],
+      ["zeta-her", "eta-her"]
+    ],
+    extraSegments: [
+      ["ras-algethi", "zeta-her"],
+      ["ras-algethi", "epsilon-her"],
+      ["ras-algethi", "pi-her"]
+    ]
+  },
+  {
+    name: "Ursa Minor",
+    labelRa: 15.2,
+    labelDec: 78.8,
+    segments: [
+      ["polaris", "yildun"],
+      ["yildun", "epsilon-umi"],
+      ["epsilon-umi", "zeta-umi"],
+      ["zeta-umi", "kochab"],
+      ["kochab", "pherkad"]
+    ],
+    extraSegments: [
+      ["zeta-umi", "eta-umi"],
+      ["eta-umi", "kochab"],
+      ["zeta-umi", "pherkad"]
+    ]
+  },
+  {
+    name: "Auriga",
+    labelRa: 5.45,
+    labelDec: 40.4,
+    segments: [
+      ["capella", "menkalinan"],
+      ["menkalinan", "almaaz"],
+      ["almaaz", "hassaleh"],
+      ["hassaleh", "capella"]
+    ],
+    extraSegments: [
+      ["capella", "almaaz"],
+      ["menkalinan", "hassaleh"]
+    ]
+  },
+  {
+    name: "Canis Minor",
+    labelRa: 7.52,
+    labelDec: 6.8,
+    segments: [
+      ["procyon", "gomeisa"]
+    ],
+    extraSegments: [
+      ["gomeisa", "alhena"]
+    ]
+  },
+  {
+    name: "Cancer",
+    labelRa: 8.72,
+    labelDec: 16.8,
+    segments: [
+      ["asellus-borealis", "asellus-australis"],
+      ["asellus-australis", "acubens"],
+      ["acubens", "altarf"]
+    ],
+    extraSegments: [
+      ["asellus-borealis", "acubens"],
+      ["asellus-borealis", "altarf"]
+    ]
+  },
+  {
+    name: "Virgo",
+    labelRa: 12.65,
+    labelDec: 2.2,
+    segments: [
+      ["zavijava", "porrima"],
+      ["porrima", "spica"],
+      ["porrima", "vindemiatrix"]
+    ],
+    extraSegments: [
+      ["zavijava", "vindemiatrix"],
+      ["vindemiatrix", "spica"]
+    ]
+  },
+  {
+    name: "Bootes",
+    labelRa: 14.62,
+    labelDec: 29.2,
+    segments: [
+      ["arcturus", "izar"],
+      ["izar", "nekkar"],
+      ["nekkar", "seginus-bootes"]
+    ],
+    extraSegments: [
+      ["arcturus", "seginus-bootes"],
+      ["izar", "seginus-bootes"]
+    ]
+  },
+  {
+    name: "Libra",
+    labelRa: 15.2,
+    labelDec: -17.8,
+    segments: [
+      ["zubenelgenubi", "zubeneschamali"],
+      ["zubenelgenubi", "brachium"],
+      ["brachium", "upsilon-lib"]
+    ],
+    extraSegments: [
+      ["zubeneschamali", "upsilon-lib"],
+      ["zubeneschamali", "brachium"]
+    ]
+  },
+  {
+    name: "Ophiuchus",
+    labelRa: 17.0,
+    labelDec: -1.5,
+    segments: [
+      ["rasalhague", "cebalrai"],
+      ["cebalrai", "yed-prior"],
+      ["yed-prior", "yed-posterior"],
+      ["yed-posterior", "sabik"]
+    ],
+    extraSegments: [
+      ["rasalhague", "yed-prior"],
+      ["cebalrai", "sabik"]
+    ]
+  },
+  {
+    name: "Aries",
+    labelRa: 1.98,
+    labelDec: 21.0,
+    segments: [
+      ["hamal", "sheratan"],
+      ["sheratan", "mesarthim"]
+    ],
+    extraSegments: [
+      ["hamal", "mesarthim"]
+    ]
+  },
+  {
+    name: "Aquarius",
+    labelRa: 21.9,
+    labelDec: -7.0,
+    segments: [
+      ["sadalmelik", "sadalsuud"],
+      ["sadalsuud", "albali"],
+      ["albali", "skat"]
+    ],
+    extraSegments: [
+      ["sadalmelik", "albali"],
+      ["sadalsuud", "skat"]
+    ]
+  },
+  {
+    name: "Capricornus",
+    labelRa: 21.05,
+    labelDec: -14.6,
+    segments: [
+      ["dabih", "algedi"],
+      ["algedi", "nashira"],
+      ["nashira", "deneb-algedi"]
+    ],
+    extraSegments: [
+      ["dabih", "nashira"],
+      ["algedi", "deneb-algedi"]
+    ]
+  },
+  {
+    name: "Pisces",
+    labelRa: 1.12,
+    labelDec: 14.6,
+    segments: [
+      ["torcular", "fumalsamakah"],
+      ["fumalsamakah", "alrescha"]
+    ],
+    extraSegments: [
+      ["torcular", "alrescha"]
+    ]
+  },
+  {
+    name: "Cetus",
+    labelRa: 1.9,
+    labelDec: -5.2,
+    segments: [
+      ["menkar", "alrescha"],
+      ["menkar", "deneb-kaitos"]
+    ],
+    extraSegments: [
+      ["deneb-kaitos", "alrescha"]
+    ]
+  },
+  {
+    name: "Centaurus",
+    labelRa: 14.2,
+    labelDec: -52.0,
+    segments: [
+      ["menkent", "epsilon-centauri"],
+      ["epsilon-centauri", "hadar"],
+      ["hadar", "rigil-kentaurus"]
+    ],
+    extraSegments: [
+      ["epsilon-centauri", "rigil-kentaurus"],
+      ["hadar", "acrux"]
+    ]
+  },
+  {
+    name: "Carina",
+    labelRa: 8.36,
+    labelDec: -59.5,
+    segments: [
+      ["canopus", "avior"],
+      ["avior", "miaplacidus"],
+      ["miaplacidus", "aspidiske"]
+    ],
+    extraSegments: [
+      ["canopus", "miaplacidus"],
+      ["avior", "aspidiske"]
+    ]
+  },
+  {
+    name: "Vela",
+    labelRa: 8.9,
+    labelDec: -49.0,
+    segments: [
+      ["regor", "suhail"],
+      ["suhail", "markeb-vela"]
+    ],
+    extraSegments: [
+      ["regor", "markeb-vela"]
+    ]
+  },
+  {
+    name: "Puppis",
+    labelRa: 7.85,
+    labelDec: -30.6,
+    segments: [
+      ["azmidi", "tureis"],
+      ["tureis", "naos"]
+    ],
+    extraSegments: [
+      ["azmidi", "naos"]
+    ]
+  },
+  {
+    name: "Piscis Austrinus",
+    labelRa: 22.9,
+    labelDec: -28.6,
+    segments: [
+      ["fomalhaut", "skat"]
+    ],
+    extraSegments: [
+      ["fomalhaut", "sadalsuud"]
     ]
   }
 ];
@@ -479,7 +803,7 @@ const asterisms = [
     ]
   },
   {
-    name: "Great Square",
+    name: "Great Square of Pegasus",
     labelRa: 23.1,
     labelDec: 26.2,
     segments: [
@@ -496,6 +820,61 @@ const asterisms = [
     segments: [
       ["gacrux", "acrux"],
       ["mimosa", "delta-crucis"]
+    ]
+  },
+  {
+    name: "Sickle of Leo",
+    labelRa: 10.45,
+    labelDec: 17.4,
+    segments: [
+      ["regulus", "algieba"],
+      ["algieba", "adhafera"],
+      ["adhafera", "rasalas"]
+    ],
+    extraSegments: [
+      ["regulus", "rasalas"],
+      ["algieba", "rasalas"]
+    ]
+  },
+  {
+    name: "Keystone of Hercules",
+    labelRa: 16.92,
+    labelDec: 34.0,
+    segments: [
+      ["eta-her", "pi-her"],
+      ["pi-her", "epsilon-her"],
+      ["epsilon-her", "zeta-her"],
+      ["zeta-her", "eta-her"]
+    ]
+  },
+  {
+    name: "Circlet of Pisces",
+    labelRa: 1.15,
+    labelDec: 11.5,
+    segments: [
+      ["alrescha", "torcular"],
+      ["torcular", "fumalsamakah"],
+      ["fumalsamakah", "alrescha"]
+    ]
+  },
+  {
+    name: "False Cross",
+    labelRa: 8.55,
+    labelDec: -51.0,
+    segments: [
+      ["avior", "markeb-vela"],
+      ["regor", "miaplacidus"]
+    ]
+  },
+  {
+    name: "Diamond Cross",
+    labelRa: 12.4,
+    labelDec: -58.8,
+    segments: [
+      ["gacrux", "mimosa"],
+      ["mimosa", "acrux"],
+      ["acrux", "delta-crucis"],
+      ["delta-crucis", "gacrux"]
     ]
   }
 ];
