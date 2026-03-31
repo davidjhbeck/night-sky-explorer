@@ -52,7 +52,9 @@ const stars = [
   { id: "castor", name: "Castor", constellation: "Gemini", ra: 7.58, dec: 31.89, mag: 1.58 },
   { id: "pollux", name: "Pollux", constellation: "Gemini", ra: 7.76, dec: 28.03, mag: 1.14 },
   { id: "mebsuta", name: "Mebsuta", constellation: "Gemini", ra: 6.73, dec: 25.13, mag: 3.06 },
+  { id: "mekbuda", name: "Mekbuda", constellation: "Gemini", ra: 6.88, dec: 24.4, mag: 3.79 },
   { id: "wasat", name: "Wasat", constellation: "Gemini", ra: 7.34, dec: 21.98, mag: 3.53 },
+  { id: "propus", name: "Propus", constellation: "Gemini", ra: 6.25, dec: 22.51, mag: 3.35 },
   { id: "tejat", name: "Tejat", constellation: "Gemini", ra: 6.38, dec: 22.51, mag: 2.87 },
   { id: "alhena", name: "Alhena", constellation: "Gemini", ra: 6.63, dec: 16.4, mag: 1.93 },
   { id: "acubens", name: "Acubens", constellation: "Cancer", ra: 8.98, dec: 11.86, mag: 4.25 },
@@ -247,13 +249,17 @@ const constellations = [
     segments: [
       ["castor", "pollux"],
       ["castor", "mebsuta"],
+      ["mebsuta", "mekbuda"],
+      ["mekbuda", "alhena"],
       ["pollux", "wasat"],
-      ["mebsuta", "wasat"],
-      ["wasat", "alhena"]
+      ["wasat", "tejat"],
+      ["tejat", "alhena"]
     ],
     extraSegments: [
-      ["pollux", "tejat"],
-      ["tejat", "alhena"],
+      ["castor", "propus"],
+      ["propus", "tejat"],
+      ["pollux", "mekbuda"],
+      ["wasat", "mekbuda"],
       ["mebsuta", "tejat"],
       ["castor", "wasat"]
     ]
